@@ -3,16 +3,19 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/AuthContext'
 import PlantCard from '@/components/PlantCard'
 import { Plant, PlantWithCareStatus, Germination, CareLog } from '@/types'
 
 export default function DashboardPage() {
+  const { user } = useAuth()
   const [plants, setPlants] = useState<PlantWithCareStatus[]>([])
   const [recentPlants, setRecentPlants] = useState<Plant[]>([])
   const [needsWatering, setNeedsWatering] = useState(0)
   const [germinationsDue, setGerminationsDue] = useState(0)
   const [totalPlants, setTotalPlants] = useState(0)
   const [loading, setLoading] = useState(true)
+  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || ''
 
   useEffect(() => {
     fetchDashboardData()
@@ -135,7 +138,7 @@ export default function DashboardPage() {
             🌿 Mi Jardín
           </h1>
           <p className="text-gray-600 mt-2">
-            Bienvenido a tu gestor de plantas personal
+            {userName ? `Bienvenido, ${userName}` : 'Bienvenido a tu gestor de plantas personal'}
           </p>
         </div>
 
