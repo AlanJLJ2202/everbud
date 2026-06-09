@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌿 Plant Manager
 
-## Getting Started
+Gestor de plantas de jardín personal con identificación por IA. Diseño inspirado en cards tipo Pokémon/Panini.
 
-First, run the development server:
+## Stack
+
+- **Framework**: Next.js 14 (App Router) + TypeScript
+- **Estilos**: Tailwind CSS
+- **Base de datos**: Supabase (PostgreSQL)
+- **Storage**: Supabase Storage
+- **IA**: Anthropic Claude API (Vision)
+- **Hosting**: Vercel
+
+## Setup en 3 pasos
+
+### 1. Clonar e instalar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd plant-manager
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurar variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crea `.env.local` con tus credenciales:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
+ANTHROPIC_API_KEY=tu-api-key
+```
 
-## Learn More
+### 3. Configurar Supabase
 
-To learn more about Next.js, take a look at the following resources:
+1. Ve a [supabase.com](https://supabase.com) y crea un proyecto
+2. En el SQL Editor, ejecuta el contenido de `supabase/schema.sql`
+3. En Storage, crea un bucket llamado `plant-images` con acceso público
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+vercel deploy
+```
 
-## Deploy on Vercel
+## Estructura del proyecto
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── app/
+│   ├── layout.tsx          # Layout raíz con nav
+│   ├── page.tsx            # Dashboard principal
+│   ├── plants/             # Grid de plantas
+│   ├── plants/[id]/        # Detalle de planta
+│   ├── new-plant/          # Nueva planta con IA
+│   ├── germinations/       # Germinaciones
+│   └── cemetery/           # Cementerio
+├── components/
+│   ├── PlantCard.tsx       # Card estilo Pokémon/Panini
+│   ├── CareLogForm.tsx     # Form de riego
+│   ├── GerminationCard.tsx # Card de germinación
+│   └── WeatherBadge.tsx    # Badge de clima
+├── lib/
+│   ├── supabase.ts         # Cliente Supabase
+│   └── claude.ts           # Wrapper Anthropic
+├── types/
+│   └── index.ts            # Interfaces TypeScript
+└── supabase/
+    └── schema.sql          # Schema de base de datos
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Funcionalidades
+
+- **Identificación por IA**: Sube una foto y Claude identifica la planta
+- **Cards Pokémon/Panini**: Diseño visual con gradientes por tipo de planta
+- **Registro de cuidados**: Riego, fertilizante, poda con registro de clima
+- **Germinaciones**: Seguimiento de semillas con alertas de revisión
+- **Cementerio**: Registro de plantas fallecidas con causa
+
+## Scripts
+
+```bash
+npm run dev      # Desarrollo
+npm run build    # Build de producción
+npm start        # Servir producción
+```
