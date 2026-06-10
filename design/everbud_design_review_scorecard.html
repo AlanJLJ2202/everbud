@@ -1,0 +1,274 @@
+
+<style>
+  .grade { display: inline-block; width: 32px; height: 32px; border-radius: 6px; text-align: center; line-height: 32px; font-size: 14px; font-weight: 500; }
+  .g-a { background: #EAF3DE; color: #3B6D11; }
+  .g-b { background: #E6F1FB; color: #185FA5; }
+  .g-c { background: #FAEEDA; color: #854F0B; }
+  .g-d { background: #FCEBEB; color: #A32D2D; }
+  .g-na { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .badge-alto { background: #FCEBEB; color: #A32D2D; }
+  .badge-medio { background: #FAEEDA; color: #854F0B; }
+  .badge-polish { background: #E6F1FB; color: #185FA5; }
+  .badge-presente { background: #FCEBEB; color: #A32D2D; }
+  .badge-ausente { background: #EAF3DE; color: #3B6D11; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .row:last-child { border-bottom: none; }
+  .section-title { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin: 20px 0 8px; }
+  .finding { padding: 10px 12px; background: var(--color-background-secondary); border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+  .bar-wrap { flex: 1; margin: 0 12px; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .slop-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 12px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .slop-row:last-child { border-bottom: none; }
+  .gw-bar { width: 100%; height: 12px; background: var(--color-background-secondary); border-radius: 6px; overflow: hidden; margin: 8px 0; }
+  .code-block { background: var(--color-background-secondary); border-radius: 8px; padding: 12px; font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--color-text-secondary); margin-top: 6px; overflow-x: auto; white-space: pre; }
+</style>
+
+<div style="padding: 1rem 0;">
+
+  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 4px;">
+    <div style="width: 36px; height: 36px; border-radius: 8px; background: #EAF3DE; display: flex; align-items: center; justify-content: center;">
+      <i class="ti ti-plant" style="font-size: 20px; color: #3B6D11;" aria-hidden="true"></i>
+    </div>
+    <div>
+      <p style="font-size: 16px; font-weight: 500; margin: 0; color: var(--color-text-primary);">Everbud — Design Review</p>
+      <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 0;">Landing page de marketing · everbud.vercel.app</p>
+    </div>
+  </div>
+
+  <div class="section-title">Primera impresión</div>
+  <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.6;">
+    El sitio comunica <strong style="color: var(--color-text-primary);">app de nicho con personalidad propia</strong>. Lo primero que ve el ojo es el heading verde+negro, luego los CTAs verdes, luego el vacío enorme antes de las features. Las áreas sin propósito claro son: el espacio blanco masivo entre el hero y la sección de features (¿faltó un mockup de producto?) y los pasos de "¿Cómo funciona?" que flotan sin ancla visual. Una palabra: <strong style="color: var(--color-text-primary);">incompleto</strong>.
+  </div>
+
+  <div class="section-title">Trunk test</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-check" style="color: #3B6D11; font-size: 15px;" aria-hidden="true"></i> ¿De qué sitio es? <strong style="margin-left: auto; color: #3B6D11;">PASS</strong></div>
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-check" style="color: #3B6D11; font-size: 15px;" aria-hidden="true"></i> ¿Opciones disponibles? <strong style="margin-left: auto; color: #3B6D11;">PASS</strong></div>
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-check" style="color: #3B6D11; font-size: 15px;" aria-hidden="true"></i> ¿En qué página estoy? <strong style="margin-left: auto; color: #3B6D11;">PASS</strong></div>
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-check" style="color: #3B6D11; font-size: 15px;" aria-hidden="true"></i> ¿Dónde dentro del sitio? <strong style="margin-left: auto; color: #3B6D11;">PASS</strong></div>
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-minus" style="color: #854F0B; font-size: 15px;" aria-hidden="true"></i> ¿Secciones principales? <strong style="margin-left: auto; color: #854F0B;">PARCIAL</strong></div>
+    <div class="finding" style="display: flex; gap: 8px; align-items: center;"><i class="ti ti-x" style="color: #A32D2D; font-size: 15px;" aria-hidden="true"></i> ¿Cómo busco algo? <strong style="margin-left: auto; color: #A32D2D;">FAIL</strong></div>
+  </div>
+  <p style="font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 0;">Score: <strong>PARTIAL 5/6</strong> — Sin search es esperado en landing, pero sin nav links el usuario no sabe qué más existe.</p>
+
+  <div class="section-title">Scorecard por categoría</div>
+  <div style="border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 4px 14px;">
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Jerarquía visual</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-tertiary);">
+        <span class="badge badge-alto">2× ALTO</span>
+        <span class="grade g-c">C</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Tipografía</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-tertiary);">
+        <span class="badge badge-alto">1× ALTO</span>
+        <span class="grade g-b">B</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Espaciado y layout</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-tertiary);">
+        <span class="badge badge-alto">1× ALTO</span><span class="badge badge-medio">1× MEDIO</span>
+        <span class="grade g-c">C</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Color y contraste</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-tertiary);">
+        <span class="badge badge-medio">1× MEDIO</span>
+        <span class="grade g-b">B</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Estados de interacción</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="grade g-b">B</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Responsive</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="grade g-na">N/A</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Contenido y microcopy</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="grade g-a">A</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">AI Slop</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-tertiary);">
+        <span class="badge badge-alto">6 patrones</span>
+        <span class="grade g-d">D</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Movimiento</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="grade g-na">N/A</span>
+      </div>
+    </div>
+    <div class="row">
+      <span style="color: var(--color-text-secondary);">Performance visual</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="grade g-b">B</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+    <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 14px; text-align: center;">
+      <p style="font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.05em;">Design Score</p>
+      <p style="font-size: 36px; font-weight: 500; color: #854F0B; margin: 0; line-height: 1;">C+</p>
+      <p style="font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 0;">Prometedor, pero inacabado</p>
+    </div>
+    <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 14px; text-align: center;">
+      <p style="font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.05em;">AI Slop Score</p>
+      <p style="font-size: 36px; font-weight: 500; color: #A32D2D; margin: 0; line-height: 1;">D</p>
+      <p style="font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 0;">6/11 patrones presentes</p>
+    </div>
+  </div>
+
+  <div class="section-title">AI Slop Detector — Los 11 patrones</div>
+  <div style="border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 4px 14px;">
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Fondo gradiente púrpura/índigo</span><span class="badge badge-ausente">AUSENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Grid 3 col: ícono + título + descripción</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Íconos en círculos de colores</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Todo centrado (text-align: center)</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Border-radius bubbly uniforme</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Blobs / SVG ondulados decorativos</span><span class="badge badge-ausente">AUSENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Emoji como elementos de diseño</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Cards con border-left de color</span><span class="badge badge-ausente">AUSENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Copy de hero genérico</span><span class="badge badge-ausente">AUSENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">Ritmo de secciones cookie-cutter</span><span class="badge badge-presente">PRESENTE</span></div>
+    <div class="slop-row"><span style="color: var(--color-text-secondary);">system-ui / Inter como fuente display</span><span class="badge badge-presente">PRESENTE</span></div>
+  </div>
+  <p style="font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 0;">Veredicto: El esquema de color y el copy salvan el sitio del slop total, pero la estructura y los emojis como íconos lo delatan inmediatamente como generado con plantilla.</p>
+
+  <div class="section-title">Goodwill Reservoir</div>
+  <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.8;">
+    <p style="margin: 0;">Base: 70</p>
+    <p style="margin: 0; color: #3B6D11;">+10 CTAs primarios obvios y prominentes</p>
+    <p style="margin: 0; color: #3B6D11;">+5 "Gratis, sin tarjeta de crédito" — transparencia directa</p>
+    <p style="margin: 0; color: #A32D2D;">−5 Sin detalles de planes/límites del free tier</p>
+    <p style="margin: 0; color: #A32D2D;">−5 Vacío visual entre hero y features genera confusión</p>
+  </div>
+  <div class="gw-bar"><div class="bar-fill" style="width: 75%; background: #3B6D11;"></div></div>
+  <p style="font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin: 0;">FINAL: 75/100 — Saludable <span style="font-weight: 400; color: var(--color-text-secondary);">(>60 = zona verde)</span></p>
+
+  <div class="section-title">⚡ Quick Wins (impacto alto, &lt;30 min)</div>
+
+  <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <span class="badge badge-alto">ALTO</span>
+      <span style="font-size: 13px; font-weight: 500; color: var(--color-text-primary);">FINDING-001: Hero sin imagen de producto</span>
+    </div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 6px;">El espacio vacío entre el CTA y la sección de features hace que el sitio parezca sin terminar. Un usuario que llega no tiene evidencia visual de cómo es el producto. La confianza de conversión cae.</p>
+    <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 0 0 4px;">Fix: agrega un mockup del dashboard entre el hero y las features:</p>
+    <div class="code-block">/* Hero wrapper con imagen abajo */
+.hero-section { padding-bottom: 0; }
+.hero-product-preview {
+  margin: 40px auto 0;
+  max-width: 860px;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.08);
+  /* screenshot del dashboard real aquí */
+}</div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 0;">Impacto: comunica credibilidad, reduce ansiedad de "¿cómo funciona esto?", mejora conversión CTR.</p>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <span class="badge badge-alto">ALTO</span>
+      <span style="font-size: 13px; font-weight: 500; color: var(--color-text-primary);">FINDING-002: Reemplazar emojis con íconos SVG reales</span>
+    </div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 6px;">Los emojis (🌿💀📋💧) tienen colores inconsistentes con la paleta, rendering diferente en cada OS y comunican "hecho en 20 min". El skull (💀) para "Registro de mortalidad" es objetivamente la peor decisión de diseño en el sitio.</p>
+    <div class="code-block">/* Sustituir con SVG monocromo en tu verde primario */
+.feature-icon {
+  width: 40px; height: 40px;
+  background: #F0FAF0; /* verde muy claro */
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #22C55E; /* tu verde */
+  font-size: 20px; /* para íconos Lucide/Tabler */
+}</div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 0;">Impacto: paleta coherente, apariencia profesional, sin sorpresas de rendering cross-platform.</p>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <span class="badge badge-alto">ALTO</span>
+      <span style="font-size: 13px; font-weight: 500; color: var(--color-text-primary);">FINDING-003: Fondo plano viola la Landing Page Rule</span>
+    </div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 6px;">El hero sobre fondo cream (#F5F3EE) sin ninguna variación no ancla la sección. Las cards blancas tampoco se separan bien del fondo.</p>
+    <div class="code-block">/* Hero con gradiente sutil o patrón */
+.hero-section {
+  background: linear-gradient(
+    180deg,
+    #F0FAF0 0%,   /* verde muy suave arriba */
+    #F8F7F2 60%,  /* cream normal */
+    #FFFFFF 100%  /* blanco al llegar a features */
+  );
+}
+
+/* O: grid pattern sutil */
+.hero-section {
+  background-color: #F8F7F2;
+  background-image: radial-gradient(#22C55E18 1px, transparent 1px);
+  background-size: 24px 24px;
+}</div>
+  </div>
+
+  <div style="background: var(--color-background-secondary); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <span class="badge badge-medio">MEDIO</span>
+      <span style="font-size: 13px; font-weight: 500; color: var(--color-text-primary);">FINDING-004: Tipografía display genérica</span>
+    </div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 0 0 6px;">Inter (o similar) como fuente de display da la señal más clara de "generado por template". Un jardin/naturaleza app puede usar algo con más personalidad para headings sin sacrificar legibilidad.</p>
+    <div class="code-block">/* Google Fonts: Fraunces (display serif con personalidad orgánica) */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;1,700&family=Inter:wght@400;500&display=swap');
+
+h1, h2 {
+  font-family: 'Fraunces', serif; /* solo headings */
+}
+body, p, button {
+  font-family: 'Inter', sans-serif; /* cuerpo sin cambios */
+}</div>
+    <p style="font-size: 12px; color: var(--color-text-secondary); margin: 6px 0 0;">Impacto: personalidad de marca inmediata, rompe el slop pattern #11, sin sacrificar legibilidad del cuerpo.</p>
+  </div>
+
+  <div class="section-title">📋 Backlog de diseño</div>
+  <div style="border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden;">
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Alinear a la izquierda los textos de features cards</span>
+      <span class="badge badge-medio">MEDIO</span>
+    </div>
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Revisar contraste del texto secundario gris (WCAG AA)</span>
+      <span class="badge badge-medio">MEDIO</span>
+    </div>
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Sección "¿Cómo funciona?" necesita anclaje visual (screenshot de cada paso)</span>
+      <span class="badge badge-medio">MEDIO</span>
+    </div>
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Captura mobile para auditoría responsive</span>
+      <span class="badge badge-polish">POLISH</span>
+    </div>
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Añadir estado hover visible en las feature cards</span>
+      <span class="badge badge-polish">POLISH</span>
+    </div>
+    <div class="row" style="padding: 8px 12px;">
+      <span style="font-size: 12px; color: var(--color-text-secondary);">Footer sin información de contacto / links legales</span>
+      <span class="badge badge-polish">POLISH</span>
+    </div>
+  </div>
+
+</div>
