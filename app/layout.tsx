@@ -2,19 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
 import Providers from "@/components/Providers";
-import UserMenu from "@/components/UserMenu";
+import AuthNav from "@/components/AuthNav";
+import MobileNav from "@/components/MobileNav";
 
 export const metadata: Metadata = {
-  title: "🌿 Plant Manager — Gestor de Plantas Personal",
-  description: "Gestiona tu jardín personal con identificación por IA",
+  title: "🌿 Everbud — Tu jardín inteligente con IA",
+  description: "Gestiona tu jardín personal con identificación por IA, alertas de riego y seguimiento de germinaciones",
 };
-
-const navLinks = [
-  { href: "/plants", label: "Mis Plantas", emoji: "🌿" },
-  { href: "/germinations", label: "Germinaciones", emoji: "🌱" },
-  { href: "/new-plant", label: "Nueva planta", emoji: "➕" },
-  { href: "/cemetery", label: "Cementerio", emoji: "💀" },
-];
 
 export default function RootLayout({
   children,
@@ -33,46 +27,16 @@ export default function RootLayout({
                 <Link href="/" className="flex items-center gap-2">
                   <span className="text-2xl">🌿</span>
                   <span className="font-serif text-xl font-bold text-gray-900">
-                    Plant Manager
+                    Everbud
                   </span>
                 </Link>
 
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-1">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="flex items-center gap-1 px-4 py-2 rounded-xl text-gray-700 hover:bg-botanical-50 hover:text-botanical-800 transition-colors text-sm font-medium"
-                    >
-                      <span>{link.emoji}</span>
-                      <span>{link.label}</span>
-                    </Link>
-                  ))}
-                </div>
-
-                {/* User Menu */}
-                <UserMenu />
+                <AuthNav />
               </div>
             </div>
 
             {/* Mobile Navigation */}
-            <div className="md:hidden border-t border-gray-100 bg-white">
-              <div className="grid grid-cols-4 gap-1 p-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex flex-col items-center gap-1 p-2 rounded-xl text-gray-700 hover:bg-botanical-50 transition-colors"
-                  >
-                    <span className="text-xl">{link.emoji}</span>
-                    <span className="text-[10px] font-medium text-center leading-tight">
-                      {link.label}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <MobileNav />
           </nav>
 
           {/* Main Content */}
@@ -81,7 +45,7 @@ export default function RootLayout({
           {/* Footer */}
           <footer className="bg-white border-t border-gray-100 py-6">
             <div className="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
-              <p>🌿 Plant Manager — Tu jardín personal con IA</p>
+              <p>🌿 Everbud — Tu jardín personal con IA</p>
             </div>
           </footer>
         </Providers>

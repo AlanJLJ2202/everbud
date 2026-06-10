@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const isPublicRoute = pathname === '/login' || pathname === '/register'
+  const isPublicRoute = pathname === '/' || pathname === '/login' || pathname === '/register'
   const isApiAuthRoute = pathname.startsWith('/api/auth')
   const isStaticFile =
     pathname.startsWith('/_next') ||
@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
