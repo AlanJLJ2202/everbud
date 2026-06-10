@@ -44,8 +44,15 @@ export default function RootLayout({
 
           {/* Footer */}
           <footer className="bg-white border-t border-gray-100 py-6">
-            <div className="max-w-6xl mx-auto px-4 text-center text-sm text-gray-500">
-              <p>🌿 Everbud — Tu jardín personal con IA</p>
+            <div className="max-w-6xl mx-auto px-4 text-center">
+              <p className="text-sm text-gray-500 mb-2">🌿 Everbud — Tu jardín personal con IA</p>
+              <div className="flex items-center justify-center gap-3 text-xs text-gray-400">
+                <Link href="/contact" className="hover:text-gray-600 transition-colors">Contacto</Link>
+                <span>·</span>
+                <Link href="/terms" className="hover:text-gray-600 transition-colors">Términos</Link>
+                <span>·</span>
+                <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacidad</Link>
+              </div>
             </div>
           </footer>
         </Providers>
