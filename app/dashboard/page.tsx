@@ -67,6 +67,7 @@ export default function DashboardPage() {
               }
               if (daysSinceWatering > plant.water_every_days) {
                 wateringStatus = 'overdue'
+                overdueDays = daysSinceWatering - plant.water_every_days
               }
             } else {
               const created = new Date(plant.created_at)
@@ -76,6 +77,7 @@ export default function DashboardPage() {
               )
               if (daysSinceCreation >= plant.water_every_days) {
                 wateringStatus = 'overdue'
+                overdueDays = daysSinceCreation - plant.water_every_days
                 waterCount++
               }
             }
