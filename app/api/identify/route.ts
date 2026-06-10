@@ -5,10 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const image = formData.get('image') as File | null
+    const locale = (formData.get('locale') as string) || 'es'
 
     if (!image) {
       return NextResponse.json(
-        { error: 'No se proporcionó imagen' },
+        { error: locale === 'en' ? 'No image provided' : 'No se proporcionó imagen' },
         { status: 400 }
       )
     }
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
     const mediaType = image.type || 'image/jpeg'
 
     // Call Claude Vision to identify the plant
-    const identification = await identifyPlant(base64Image, mediaType)
+    const identification = await identifyPlant(base64Image, mediaType, locale)
 
     return NextResponse.json(identification)
   } catch (error) {

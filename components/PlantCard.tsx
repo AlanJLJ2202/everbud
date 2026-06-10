@@ -6,10 +6,8 @@ import {
   Plant,
   PlantWithCareStatus,
   PlantType,
-  PLANT_TYPE_LABELS,
-  LIGHT_TYPE_LABELS,
-  LIGHT_TYPE_ICONS,
 } from '@/types'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface PlantCardProps {
   plant: Plant | PlantWithCareStatus
@@ -32,34 +30,56 @@ function getGradientClass(type: PlantType | null): string {
   }
 }
 
-function getWateringBadge(status: 'ok' | 'today' | 'overdue', overdueDays: number) {
-  switch (status) {
-    case 'ok':
-      return (
-        <span className="badge-alive px-2 py-1 rounded-full text-xs font-semibold">
-          ✓ Al día
-        </span>
-      )
-    case 'today':
-      return (
-        <span className="badge-needs-water px-2 py-1 rounded-full text-xs font-semibold">
-          💧 Hoy toca
-        </span>
-      )
-    case 'overdue':
-      return (
-        <span className="badge-overdue px-2 py-1 rounded-full text-xs font-semibold">
-          ⚠️ Atrasado {overdueDays}d
-        </span>
-      )
-  }
-}
-
 export default function PlantCard({ plant, wateringStatus = 'ok', overdueDays = 0 }: PlantCardProps) {
+  const { t, locale } = useLanguage()
   const gradientClass = getGradientClass(plant.type)
-  const lightIcon = plant.light_type ? LIGHT_TYPE_ICONS[plant.light_type] : '🌿'
-  const lightLabel = plant.light_type ? LIGHT_TYPE_LABELS[plant.light_type] : 'Sin definir'
-  const typeLabel = plant.type ? PLANT_TYPE_LABELS[plant.type] : 'Otro'
+
+  const lightTypeLabels: Record<string, string> = {
+    sol_pleno: t('lightType.sol_pleno'),
+    media_sombra: t('lightType.media_sombra'),
+    sombra: t('lightType.sombra'),
+  }
+
+  const lightTypeIcons: Record<string, string> = {
+    sol_pleno: '🌞',
+    media_sombra: '🌤',
+    sombra: '🌑',
+  }
+
+  const plantTypeLabels: Record<string, string> = {
+    frutal: t('plantType.frutal'),
+    floral: t('plantType.floral'),
+    suculenta: t('plantType.suculenta'),
+    aromatica: t('plantType.aromatica'),
+    otro: t('plantType.otro'),
+  }
+
+  const lightIcon = plant.light_type ? lightTypeIcons[plant.light_type] : '🌿'
+  const lightLabel = plant.light_type ? lightTypeLabels[plant.light_type] : t('common.undefined')
+  const typeLabel = plant.type ? plantTypeLabels[plant.type] : t('plantType.otro')
+
+  function getWateringBadge() {
+    switch (wateringStatus) {
+      case 'ok':
+        return (
+          <span className="badge-alive px-2 py-1 rounded-full text-xs font-semibold">
+            {t('plantCard.upToDate')}
+          </span>
+        )
+      case 'today':
+        return (
+          <span className="badge-needs-water px-2 py-1 rounded-full text-xs font-semibold">
+            {t('plantCard.todayDue')}
+          </span>
+        )
+      case 'overdue':
+        return (
+          <span className="badge-overdue px-2 py-1 rounded-full text-xs font-semibold">
+            {t('plantCard.overdue', { days: overdueDays })}
+          </span>
+        )
+    }
+  }
 
   return (
     <Link href={`/plants/${plant.id}`} className="block">
@@ -84,7 +104,7 @@ export default function PlantCard({ plant, wateringStatus = 'ok', overdueDays = 
 
           {/* Watering Status Badge */}
           <div className="absolute top-3 right-3">
-            {getWateringBadge(wateringStatus, overdueDays)}
+            {getWateringBadge()}
           </div>
         </div>
 
@@ -116,7 +136,7 @@ export default function PlantCard({ plant, wateringStatus = 'ok', overdueDays = 
             <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
               <span className="text-lg">💧</span>
               <span className="text-[10px] text-gray-600 mt-1 text-center leading-tight">
-                {plant.water_every_days ? `Cada ${plant.water_every_days}d` : 'Sin definir'}
+                {plant.water_every_days ? t('plantCard.everyDays', { days: plant.water_every_days }) : t('common.undefined')}
               </span>
             </div>
 

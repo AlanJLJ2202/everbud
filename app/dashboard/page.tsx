@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import PlantCard from '@/components/PlantCard'
-import { Plant, PlantWithCareStatus, Germination, CareLog } from '@/types'
+import { Plant, PlantWithCareStatus } from '@/types'
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [plants, setPlants] = useState<PlantWithCareStatus[]>([])
   const [recentPlants, setRecentPlants] = useState<Plant[]>([])
   const [needsWatering, setNeedsWatering] = useState(0)
@@ -25,7 +27,6 @@ export default function DashboardPage() {
     try {
       setLoading(true)
 
-      // Fetch alive plants
       const { data: plantsData } = await supabase
         .from('plants')
         .select('*')
@@ -36,7 +37,6 @@ export default function DashboardPage() {
       setTotalPlants(allPlants.length)
       setRecentPlants(allPlants.slice(0, 3))
 
-      // Calculate watering status for each plant
       let waterCount = 0
       const plantsWithStatus: PlantWithCareStatus[] = await Promise.all(
         allPlants.map(async (plant: Plant) => {
@@ -94,7 +94,6 @@ export default function DashboardPage() {
       setPlants(plantsWithStatus)
       setNeedsWatering(waterCount)
 
-      // Count germinations due
       const { data: germinations } = await supabase
         .from('germinations')
         .select('*')
@@ -135,44 +134,41 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-serif text-4xl font-bold text-gray-900">
-            🌿 Mi Jardín
+            {t('dashboard.title')}
           </h1>
           <p className="text-gray-600 mt-2">
-            {userName ? `Bienvenido, ${userName}` : 'Bienvenido a tu gestor de plantas personal'}
+            {userName ? t('dashboard.welcome', { name: userName }) : t('dashboard.welcomeDefault')}
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {/* Total Plants */}
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
             <div className="flex items-center gap-4">
               <span className="text-4xl">🌱</span>
               <div>
                 <p className="text-3xl font-bold text-gray-900">{totalPlants}</p>
-                <p className="text-sm text-gray-600">Plantas vivas</p>
+                <p className="text-sm text-gray-600">{t('dashboard.livePlants')}</p>
               </div>
             </div>
           </div>
 
-          {/* Needs Watering */}
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
             <div className="flex items-center gap-4">
               <span className="text-4xl">💧</span>
               <div>
                 <p className="text-3xl font-bold text-botanical-700">{needsWatering}</p>
-                <p className="text-sm text-gray-600">Necesitan riego hoy</p>
+                <p className="text-sm text-gray-600">{t('dashboard.needWatering')}</p>
               </div>
             </div>
           </div>
 
-          {/* Germinations Due */}
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
             <div className="flex items-center gap-4">
               <span className="text-4xl">🔍</span>
               <div>
                 <p className="text-3xl font-bold text-amber-600">{germinationsDue}</p>
-                <p className="text-sm text-gray-600">Germinaciones pendientes</p>
+                <p className="text-sm text-gray-600">{t('dashboard.pendingGerminations')}</p>
               </div>
             </div>
           </div>
@@ -185,21 +181,21 @@ export default function DashboardPage() {
             className="bg-botanical-600 text-white rounded-2xl p-6 text-center hover:bg-botanical-700 transition-colors"
           >
             <span className="text-3xl block mb-2">➕</span>
-            <span className="font-semibold">Nueva planta</span>
+            <span className="font-semibold">{t('dashboard.newPlant')}</span>
           </Link>
           <Link
             href="/plants"
             className="bg-blue-600 text-white rounded-2xl p-6 text-center hover:bg-blue-700 transition-colors"
           >
             <span className="text-3xl block mb-2">💧</span>
-            <span className="font-semibold">Registrar riego</span>
+            <span className="font-semibold">{t('dashboard.registerWatering')}</span>
           </Link>
           <Link
             href="/germinations"
             className="bg-amber-600 text-white rounded-2xl p-6 text-center hover:bg-amber-700 transition-colors"
           >
             <span className="text-3xl block mb-2">🌱</span>
-            <span className="font-semibold">Nueva germinación</span>
+            <span className="font-semibold">{t('dashboard.newGermination')}</span>
           </Link>
         </div>
 
@@ -207,17 +203,17 @@ export default function DashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-serif text-2xl font-bold text-gray-900">
-              Últimas plantas agregadas
+              {t('dashboard.latestPlants')}
             </h2>
             <Link href="/plants" className="text-botanical-600 hover:underline text-sm">
-              Ver todas →
+              {t('dashboard.viewAll')}
             </Link>
           </div>
 
           {recentPlants.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 text-center">
               <span className="text-6xl block mb-4">🌱</span>
-              <p className="text-gray-600">Agrega tu primera planta</p>
+              <p className="text-gray-600">{t('dashboard.addFirstPlant')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

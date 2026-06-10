@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { Plant, DeathLog, DeathCause, DEATH_CAUSE_EMOJI } from '@/types'
+import { useLanguage } from '@/context/LanguageContext'
+import { Plant, DeathLog, DeathCause } from '@/types'
 
 interface DeadPlant {
   plant: Plant
@@ -12,9 +13,30 @@ interface DeadPlant {
 }
 
 export default function CemeteryPage() {
+  const { t, locale } = useLanguage()
   const [deadPlants, setDeadPlants] = useState<DeadPlant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const deathCauseEmoji: Record<DeathCause, string> = {
+    sequia: '🏜️',
+    plaga: '🐛',
+    exceso_agua: '🌊',
+    frio: '🧊',
+    enfermedad: '🦠',
+    otro: '❓',
+  }
+
+  const deathCauseLabels: Record<DeathCause, string> = {
+    sequia: t('deathCause.sequia'),
+    plaga: t('deathCause.plaga'),
+    exceso_agua: t('deathCause.exceso_agua'),
+    frio: t('deathCause.frio'),
+    enfermedad: t('deathCause.enfermedad'),
+    otro: t('deathCause.otro'),
+  }
+
+  const dateLocale = locale === 'es' ? 'es-ES' : 'en-US'
 
   useEffect(() => {
     fetchDeadPlants()
@@ -25,7 +47,6 @@ export default function CemeteryPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch dead plants
       const { data: plantsData, error: plantsError } = await supabase
         .from('plants')
         .select('*')
@@ -34,7 +55,6 @@ export default function CemeteryPage() {
 
       if (plantsError) throw new Error(plantsError.message)
 
-      // Fetch death logs for each plant
       const deadPlantsData: DeadPlant[] = await Promise.all(
         (plantsData || []).map(async (plant: Plant) => {
           const { data: deathLogs } = await supabase
@@ -59,7 +79,7 @@ export default function CemeteryPage() {
 
       setDeadPlants(deadPlantsData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar el cementerio')
+      setError(err instanceof Error ? err.message : t('cemetery.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -71,10 +91,10 @@ export default function CemeteryPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-gray-900">
-            💀 Cementerio
+            {t('cemetery.title')}
           </h1>
           <p className="text-gray-600 mt-1">
-            {deadPlants.length} {deadPlants.length === 1 ? 'planta descansando' : 'plantas descansando'}
+            {deadPlants.length} {t('cemetery.plantCount')}
           </p>
         </div>
 
@@ -89,17 +109,17 @@ export default function CemeteryPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="loading-spinner mb-4"></div>
-            <p className="text-gray-600">Cargando...</p>
+            <p className="text-gray-600">{t('cemetery.loading')}</p>
           </div>
         ) : deadPlants.length === 0 ? (
           /* Empty State */
           <div className="text-center py-20">
             <span className="text-8xl block mb-6">🌿</span>
             <h2 className="font-serif text-2xl font-bold text-gray-900 mb-3">
-              El cementerio está vacío
+              {t('cemetery.emptyTitle')}
             </h2>
             <p className="text-gray-600 max-w-md mx-auto">
-              Afortunadamente, ninguna planta ha fallecido. ¡Sigue cuidando de ellas!
+              {t('cemetery.emptyDesc')}
             </p>
           </div>
         ) : (
@@ -126,7 +146,6 @@ export default function CemeteryPage() {
                         <span className="text-6xl grayscale">🌿</span>
                       </div>
                     )}
-                    {/* Dark overlay */}
                     <div className="absolute inset-0 bg-black/30"></div>
                   </div>
                 </div>
@@ -139,15 +158,15 @@ export default function CemeteryPage() {
 
                   {/* Death Cause */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{DEATH_CAUSE_EMOJI[deathLog.cause]}</span>
-                    <span className="text-sm text-gray-600 capitalize">
-                      {deathLog.cause.replace('_', ' ')}
+                    <span className="text-2xl">{deathCauseEmoji[deathLog.cause]}</span>
+                    <span className="text-sm text-gray-600">
+                      {deathCauseLabels[deathLog.cause]}
                     </span>
                   </div>
 
                   {/* Death Date */}
                   <p className="text-xs text-gray-500">
-                    Falleció: {new Date(deathLog.died_at).toLocaleDateString('es-ES')}
+                    {t('cemetery.diedOn', { date: new Date(deathLog.died_at).toLocaleDateString(dateLocale) })}
                   </p>
 
                   {/* Notes */}

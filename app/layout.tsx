@@ -4,6 +4,7 @@ import Link from "next/link";
 import Providers from "@/components/Providers";
 import AuthNav from "@/components/AuthNav";
 import MobileNav from "@/components/MobileNav";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "🌿 Everbud — Tu jardín inteligente con IA",
@@ -17,6 +18,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var l=localStorage.getItem('locale');if(l==='en'||l==='es'){document.documentElement.lang=l;return;}var n=navigator.language||'';document.documentElement.lang=n.startsWith('es')?'es':'en';}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <Providers>
           {/* Navigation */}
@@ -43,18 +51,7 @@ export default function RootLayout({
           <main className="min-h-[calc(100vh-4rem)]">{children}</main>
 
           {/* Footer */}
-          <footer className="bg-white border-t border-gray-100 py-6">
-            <div className="max-w-6xl mx-auto px-4 text-center">
-              <p className="text-sm text-gray-500 mb-2">🌿 Everbud — Tu jardín personal con IA</p>
-              <div className="flex items-center justify-center gap-3 text-xs text-gray-400">
-                <Link href="/contact" className="hover:text-gray-600 transition-colors">Contacto</Link>
-                <span>·</span>
-                <Link href="/terms" className="hover:text-gray-600 transition-colors">Términos</Link>
-                <span>·</span>
-                <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacidad</Link>
-              </div>
-            </div>
-          </footer>
+          <Footer />
         </Providers>
       </body>
     </html>

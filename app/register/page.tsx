@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import Link from 'next/link'
 
 export default function RegisterPage() {
   const { signUp, signInWithGoogle } = useAuth()
+  const { t } = useLanguage()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,7 +20,7 @@ export default function RegisterPage() {
     setError(null)
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
+      setError(t('register.errorPassword'))
       return
     }
 
@@ -29,7 +31,7 @@ export default function RegisterPage() {
     if (error) {
       setError(
         error === 'User already registered'
-          ? 'Ya existe una cuenta con este email'
+          ? t('register.errorExists')
           : error
       )
       setLoading(false)
@@ -45,17 +47,16 @@ export default function RegisterPage() {
         <div className="w-full max-w-md text-center">
           <span className="text-5xl block mb-4">✉️</span>
           <h1 className="text-3xl font-serif font-bold text-gray-900 mb-3">
-            Revisa tu email
+            {t('register.successTitle')}
           </h1>
           <p className="text-gray-600 mb-6">
-            Te enviamos un enlace de confirmación a <strong>{email}</strong>.
-            Confirma tu email para poder iniciar sesión.
+            {t('register.successMessage', { email })}
           </p>
           <Link
             href="/login"
             className="inline-block bg-botanical-600 hover:bg-botanical-700 text-white font-medium py-3 px-6 rounded-xl transition-colors"
           >
-            Ir a iniciar sesión
+            {t('register.successButton')}
           </Link>
         </div>
       </div>
@@ -68,10 +69,10 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <span className="text-5xl block mb-4">🌱</span>
           <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">
-            Crea tu cuenta
+            {t('register.title')}
           </h1>
           <p className="text-gray-600">
-            Empieza a gestionar tu jardín personal
+            {t('register.subtitle')}
           </p>
         </div>
 
@@ -85,7 +86,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Nombre
+                {t('register.name')}
               </label>
               <input
                 id="name"
@@ -93,14 +94,14 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                placeholder="Tu nombre"
+                placeholder={t('register.namePlaceholder')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-botanical-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
               />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email
+                {t('register.email')}
               </label>
               <input
                 id="email"
@@ -115,7 +116,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contraseña
+                {t('register.password')}
               </label>
               <input
                 id="password"
@@ -123,7 +124,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Mínimo 6 caracteres"
+                placeholder={t('register.passwordPlaceholder')}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-botanical-500 outline-none transition-all text-gray-900 placeholder:text-gray-400"
               />
             </div>
@@ -133,13 +134,13 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-botanical-600 hover:bg-botanical-700 disabled:bg-botanical-400 text-white font-medium py-3 px-4 rounded-xl transition-colors"
             >
-              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+              {loading ? t('register.submitting') : t('register.submit')}
             </button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
             <div className="flex-1 border-t border-gray-200" />
-            <span className="text-xs text-gray-500 uppercase tracking-wide">o</span>
+            <span className="text-xs text-gray-500 uppercase tracking-wide">{t('common.or')}</span>
             <div className="flex-1 border-t border-gray-200" />
           </div>
 
@@ -153,14 +154,14 @@ export default function RegisterPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continuar con Google
+            {t('register.google')}
           </button>
         </div>
 
         <p className="text-center mt-6 text-sm text-gray-600">
-          ¿Ya tienes cuenta?{' '}
+          {t('register.hasAccount')}{' '}
           <Link href="/login" className="text-botanical-600 hover:text-botanical-700 font-medium">
-            Iniciar sesión
+            {t('register.login')}
           </Link>
         </p>
       </div>

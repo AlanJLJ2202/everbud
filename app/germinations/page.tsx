@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/context/LanguageContext'
 import GerminationCard from '@/components/GerminationCard'
 import { Germination, GerminationWithStatus } from '@/types'
 
 export default function GerminationsPage() {
+  const { t } = useLanguage()
   const [germinations, setGerminations] = useState<GerminationWithStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
 
-  // Form state
   const [seedName, setSeedName] = useState('')
   const [startedAt, setStartedAt] = useState(new Date().toISOString().split('T')[0])
   const [checkEveryDays, setCheckEveryDays] = useState(3)
@@ -34,7 +35,6 @@ export default function GerminationsPage() {
 
       if (fetchError) throw new Error(fetchError.message)
 
-      // Calculate status for each germination
       const germinationsWithStatus: GerminationWithStatus[] = (data || []).map((g) => {
         const now = new Date()
         const startDate = new Date(g.started_at)
@@ -64,7 +64,7 @@ export default function GerminationsPage() {
 
       setGerminations(germinationsWithStatus)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar germinaciones')
+      setError(err instanceof Error ? err.message : t('germinations.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -92,7 +92,7 @@ export default function GerminationsPage() {
       setShowForm(false)
       fetchGerminations()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear germinación')
+      setError(err instanceof Error ? err.message : t('germinations.errorCreate'))
     } finally {
       setIsSubmitting(false)
     }
@@ -147,17 +147,17 @@ export default function GerminationsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-serif text-3xl font-bold text-gray-900">
-              🌱 Germinaciones
+              {t('germinations.title')}
             </h1>
             <p className="text-gray-600 mt-1">
-              {activeGerminations.length} {activeGerminations.length === 1 ? 'germinación activa' : 'germinaciones activas'}
+              {activeGerminations.length} {t('germinations.activeCount')}
             </p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
             className="bg-botanical-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-botanical-700 transition-colors"
           >
-            ➕ Nueva germinación
+            {t('germinations.newGermination')}
           </button>
         </div>
 
@@ -172,19 +172,19 @@ export default function GerminationsPage() {
         {showForm && (
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
             <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-              Nueva germinación
+              {t('germinations.formTitle')}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="seedName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de la semilla *
+                  {t('germinations.seedName')}
                 </label>
                 <input
                   type="text"
                   id="seedName"
                   value={seedName}
                   onChange={(e) => setSeedName(e.target.value)}
-                  placeholder="Ej: Tomate cherry"
+                  placeholder={t('germinations.seedNamePlaceholder')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent"
                   required
                 />
@@ -193,7 +193,7 @@ export default function GerminationsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="startedAt" className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha de inicio
+                    {t('germinations.startDate')}
                   </label>
                   <input
                     type="date"
@@ -206,7 +206,7 @@ export default function GerminationsPage() {
 
                 <div>
                   <label htmlFor="checkDays" className="block text-sm font-medium text-gray-700 mb-1">
-                    Revisar cada (días)
+                    {t('germinations.checkDays')}
                   </label>
                   <input
                     type="number"
@@ -222,13 +222,13 @@ export default function GerminationsPage() {
 
               <div>
                 <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                  Notas (opcional)
+                  {t('germinations.notes')}
                 </label>
                 <textarea
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Instrucciones especiales, variedad, etc."
+                  placeholder={t('germinations.notesPlaceholder')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent resize-none"
                   rows={2}
                 />
@@ -240,14 +240,14 @@ export default function GerminationsPage() {
                   disabled={isSubmitting}
                   className="flex-1 bg-botanical-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-botanical-700 transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Guardando...' : '🌱 Crear germinación'}
+                  {isSubmitting ? t('germinations.creating') : t('germinations.createButton')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
@@ -258,23 +258,23 @@ export default function GerminationsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="loading-spinner mb-4"></div>
-            <p className="text-gray-600">Cargando germinaciones...</p>
+            <p className="text-gray-600">{t('germinations.loading')}</p>
           </div>
         ) : germinations.length === 0 ? (
           /* Empty State */
           <div className="text-center py-20">
             <span className="text-8xl block mb-6">🌱</span>
             <h2 className="font-serif text-2xl font-bold text-gray-900 mb-3">
-              Sin germinaciones
+              {t('germinations.emptyTitle')}
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Comienza registrando tus primeras semillas para hacer seguimiento de su progreso.
+              {t('germinations.emptyDesc')}
             </p>
             <button
               onClick={() => setShowForm(true)}
               className="inline-block bg-botanical-600 text-white px-6 py-3 rounded-xl font-semibold text-lg hover:bg-botanical-700 transition-colors"
             >
-              🌱 Crear primera germinación
+              {t('germinations.createFirst')}
             </button>
           </div>
         ) : (
@@ -283,7 +283,7 @@ export default function GerminationsPage() {
             {activeGerminations.length > 0 && (
               <div>
                 <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-                  Activas
+                  {t('germinations.active')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {activeGerminations.map((g) => (
@@ -303,7 +303,7 @@ export default function GerminationsPage() {
             {completedGerminations.length > 0 && (
               <div>
                 <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-                  Completadas
+                  {t('germinations.completed')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {completedGerminations.map((g) => (

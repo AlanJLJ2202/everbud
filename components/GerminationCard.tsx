@@ -1,6 +1,7 @@
 'use client'
 
 import { Germination, GerminationWithStatus } from '@/types'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface GerminationCardProps {
   germination: Germination | GerminationWithStatus
@@ -9,35 +10,13 @@ interface GerminationCardProps {
   onMarkFallida: (id: string) => Promise<void>
 }
 
-function getCheckStatusBadge(status: 'ok' | 'today' | 'overdue') {
-  switch (status) {
-    case 'ok':
-      return (
-        <span className="badge-alive px-2 py-1 rounded-full text-xs font-semibold">
-          ✓ Al día
-        </span>
-      )
-    case 'today':
-      return (
-        <span className="badge-needs-water px-2 py-1 rounded-full text-xs font-semibold">
-          🔍 Revisar hoy
-        </span>
-      )
-    case 'overdue':
-      return (
-        <span className="badge-overdue px-2 py-1 rounded-full text-xs font-semibold">
-          ⚠️ Atrasado
-        </span>
-      )
-  }
-}
-
 export default function GerminationCard({
   germination,
   onCheckToday,
   onMarkExitosa,
   onMarkFallida,
 }: GerminationCardProps) {
+  const { t, locale } = useLanguage()
   const isEnCurso = germination.status === 'en_curso'
   const daysElapsed = 'daysElapsed' in germination
     ? (germination as GerminationWithStatus).daysElapsed
@@ -49,6 +28,31 @@ export default function GerminationCard({
     ? (germination as GerminationWithStatus).checkStatus
     : 'ok'
 
+  function getCheckStatusBadge() {
+    switch (checkStatus) {
+      case 'ok':
+        return (
+          <span className="badge-alive px-2 py-1 rounded-full text-xs font-semibold">
+            {t('germinationCard.upToDate')}
+          </span>
+        )
+      case 'today':
+        return (
+          <span className="badge-needs-water px-2 py-1 rounded-full text-xs font-semibold">
+            {t('germinationCard.checkToday')}
+          </span>
+        )
+      case 'overdue':
+        return (
+          <span className="badge-overdue px-2 py-1 rounded-full text-xs font-semibold">
+            {t('germinationCard.overdue')}
+          </span>
+        )
+    }
+  }
+
+  const dateLocale = locale === 'es' ? 'es-ES' : 'en-US'
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
       <div className="flex items-start justify-between mb-3">
@@ -57,22 +61,22 @@ export default function GerminationCard({
             {germination.seed_name}
           </h3>
           <p className="text-sm text-gray-500">
-            Iniciado: {new Date(germination.started_at).toLocaleDateString('es-ES')}
+            {t('germinationCard.started', { date: new Date(germination.started_at).toLocaleDateString(dateLocale) })}
           </p>
         </div>
-        {isEnCurso && getCheckStatusBadge(checkStatus)}
+        {isEnCurso && getCheckStatusBadge()}
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <p className="text-2xl font-bold text-botanical-700">{daysElapsed}</p>
-          <p className="text-xs text-gray-600">días transcurridos</p>
+          <p className="text-xs text-gray-600">{t('germinationCard.daysElapsed')}</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-2 text-center">
           <p className="text-2xl font-bold text-botanical-700">
             {germination.check_every_days}
           </p>
-          <p className="text-xs text-gray-600">días entre revisiones</p>
+          <p className="text-xs text-gray-600">{t('germinationCard.daysBetweenChecks')}</p>
         </div>
       </div>
 
@@ -88,19 +92,19 @@ export default function GerminationCard({
             onClick={() => onCheckToday(germination.id)}
             className="flex-1 bg-botanical-600 text-white py-2 px-3 rounded-xl text-sm font-semibold hover:bg-botanical-700 transition-colors"
           >
-            🔍 Revisé hoy
+            {t('germinationCard.checkedToday')}
           </button>
           <button
             onClick={() => onMarkExitosa(germination.id)}
             className="flex-1 bg-green-100 text-green-800 py-2 px-3 rounded-xl text-sm font-semibold hover:bg-green-200 transition-colors"
           >
-            ✓ Exitosa
+            {t('germinationCard.successful')}
           </button>
           <button
             onClick={() => onMarkFallida(germination.id)}
             className="flex-1 bg-red-100 text-red-800 py-2 px-3 rounded-xl text-sm font-semibold hover:bg-red-200 transition-colors"
           >
-            ✗ Fallida
+            {t('germinationCard.failed')}
           </button>
         </div>
       )}
@@ -113,7 +117,7 @@ export default function GerminationCard({
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {germination.status === 'exitosa' ? '✓ Germinación exitosa' : '✗ Germinación fallida'}
+          {germination.status === 'exitosa' ? t('germinationCard.germinationSuccess') : t('germinationCard.germinationFailed')}
         </div>
       )}
     </div>

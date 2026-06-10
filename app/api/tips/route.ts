@@ -4,16 +4,16 @@ import { generateContextualTip } from '@/lib/claude'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { plantName, commonName } = body
+    const { plantName, commonName, locale } = body
 
     if (!plantName) {
       return NextResponse.json(
-        { error: 'Se requiere nombre de planta' },
+        { error: locale === 'en' ? 'Plant name required' : 'Se requiere nombre de planta' },
         { status: 400 }
       )
     }
 
-    const tip = await generateContextualTip(plantName, commonName || '')
+    const tip = await generateContextualTip(plantName, commonName || '', locale || 'es')
 
     return NextResponse.json({ tip })
   } catch (error) {

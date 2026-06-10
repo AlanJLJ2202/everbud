@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Weather, WEATHER_LABELS, WEATHER_ICONS } from '@/types'
+import { Weather } from '@/types'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface CareLogFormProps {
   plantId: string
@@ -10,9 +11,24 @@ interface CareLogFormProps {
 }
 
 export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogFormProps) {
+  const { t } = useLanguage()
   const [weather, setWeather] = useState<Weather>('soleado')
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const weatherLabels: Record<Weather, string> = {
+    soleado: t('weather.soleado'),
+    nublado: t('weather.nublado'),
+    lluvioso: t('weather.lluvioso'),
+    ventoso: t('weather.ventoso'),
+  }
+
+  const weatherIcons: Record<Weather, string> = {
+    soleado: '☀️',
+    nublado: '☁️',
+    lluvioso: '🌧',
+    ventoso: '💨',
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,10 +51,10 @@ export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogForm
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          ¿Cómo está el clima hoy?
+          {t('careLog.weatherQuestion')}
         </label>
         <div className="grid grid-cols-2 gap-2">
-          {(Object.keys(WEATHER_LABELS) as Weather[]).map((w) => (
+          {(Object.keys(weatherLabels) as Weather[]).map((w) => (
             <button
               key={w}
               type="button"
@@ -49,8 +65,8 @@ export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogForm
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
-              <span className="text-2xl">{WEATHER_ICONS[w]}</span>
-              <span className="text-sm font-medium">{WEATHER_LABELS[w]}</span>
+              <span className="text-2xl">{weatherIcons[w]}</span>
+              <span className="text-sm font-medium">{weatherLabels[w]}</span>
             </button>
           ))}
         </div>
@@ -58,13 +74,13 @@ export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogForm
 
       <div>
         <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-          Notas (opcional)
+          {t('careLog.notesLabel')}
         </label>
         <textarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="¿Algo notable sobre la planta?"
+          placeholder={t('careLog.notesPlaceholder')}
           className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent resize-none"
           rows={3}
         />
@@ -79,10 +95,10 @@ export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogForm
           {isSubmitting ? (
             <span className="flex items-center justify-center gap-2">
               <span className="loading-spinner"></span>
-              Guardando...
+              {t('careLog.saving')}
             </span>
           ) : (
-            '💧 Confirmar riego'
+            t('careLog.confirmWatering')
           )}
         </button>
         <button
@@ -90,7 +106,7 @@ export default function CareLogForm({ plantId, onSubmit, onCancel }: CareLogForm
           onClick={onCancel}
           className="px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
       </div>
     </form>

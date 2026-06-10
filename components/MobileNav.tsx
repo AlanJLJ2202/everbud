@@ -2,18 +2,20 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
-
-const navLinks = [
-  { href: '/plants', label: 'Mis Plantas', emoji: '🌿' },
-  { href: '/germinations', label: 'Germinaciones', emoji: '🌱' },
-  { href: '/new-plant', label: 'Nueva planta', emoji: '➕' },
-  { href: '/cemetery', label: 'Cementerio', emoji: '💀' },
-]
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function MobileNav() {
   const { user, loading } = useAuth()
+  const { t } = useLanguage()
 
   if (loading || !user) return null
+
+  const navLinks = [
+    { href: '/plants', label: t('nav.myPlants'), emoji: '🌿' },
+    { href: '/germinations', label: t('nav.germinations'), emoji: '🌱' },
+    { href: '/new-plant', label: t('nav.newPlant'), emoji: '➕' },
+    { href: '/cemetery', label: t('nav.cemetery'), emoji: '💀' },
+  ]
 
   return (
     <div className="md:hidden border-t border-gray-100 bg-white">

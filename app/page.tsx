@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import {
@@ -20,72 +21,9 @@ import {
   Clock,
 } from 'lucide-react'
 
-const features = [
-  {
-    icon: Scan,
-    title: 'Identificación con IA',
-    description:
-      'Sube una foto y Claude identifica automáticamente la especie, tipo de luz y frecuencia de riego.',
-  },
-  {
-    icon: ClipboardList,
-    title: 'Tarjetas coleccionables',
-    description:
-      'Cada planta tiene su propia tarjeta con gradiente según su tipo: frutal, floral, suculenta y más.',
-  },
-  {
-    icon: Droplets,
-    title: 'Alertas de riego',
-    description:
-      'Nunca olvides regar. Recibe alertas cuando tus plantas necesitan atención.',
-  },
-  {
-    icon: Sprout,
-    title: 'Seguimiento de germinación',
-    description:
-      'Monitorea tus semillas desde la siembra con revisiones configurables y estados en tiempo real.',
-  },
-  {
-    icon: Leaf,
-    title: 'Registro de mortalidad',
-    description:
-      'Documenta qué plantas se perdieron y por qué, para aprender y mejorar tu jardín.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Dashboard inteligente',
-    description:
-      'Vista general en tiempo real: plantas vivas, riegos pendientes y germinaciones activas.',
-  },
-]
-
-const steps = [
-  {
-    number: '1',
-    icon: Camera,
-    title: 'Registra tu planta',
-    description: 'Toma una foto o escribe el nombre. La IA hace el resto.',
-    preview: 'photo',
-  },
-  {
-    number: '2',
-    icon: Scan,
-    title: 'La IA la identifica',
-    description:
-      'Claude analiza la imagen y te dice qué especie es, qué luz necesita y cada cuánto regarla.',
-    preview: 'identify',
-  },
-  {
-    number: '3',
-    icon: Bell,
-    title: 'Recibe alertas',
-    description:
-      'Tu jardín te avisa cuándo regar, fertilizar o revisar cada planta.',
-    preview: 'alert',
-  },
-]
-
 function StepPreview({ type }: { type: string }) {
+  const { t } = useLanguage()
+
   if (type === 'photo') {
     return (
       <div className="mt-4 bg-gray-50 rounded-lg border border-gray-200 p-3 max-w-[200px]">
@@ -106,13 +44,13 @@ function StepPreview({ type }: { type: string }) {
         </div>
         <div className="flex flex-wrap gap-1">
           <span className="text-[10px] bg-botanical-100 text-botanical-700 px-2 py-0.5 rounded-full">
-            Floral
+            {t('landing.previewIdentify')}
           </span>
           <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-            Sol directo
+            {t('landing.previewIdentifyLight')}
           </span>
           <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-            Cada 2d
+            {t('landing.previewIdentifyWater')}
           </span>
         </div>
       </div>
@@ -124,26 +62,28 @@ function StepPreview({ type }: { type: string }) {
         <div className="w-5 h-5 bg-botanical-500 rounded-md flex items-center justify-center">
           <Droplets className="w-3 h-3 text-white" />
         </div>
-        <span className="text-xs font-medium text-gray-900">Riego pendiente</span>
+        <span className="text-xs font-medium text-gray-900">{t('landing.previewAlertTitle')}</span>
       </div>
       <div className="flex items-center gap-1 text-[10px] text-gray-500">
         <Clock className="w-3 h-3" />
-        <span>Hace 2 días</span>
+        <span>{t('landing.previewAlertTime')}</span>
       </div>
     </div>
   )
 }
 
 function DashboardPlaceholder() {
+  const { t } = useLanguage()
+
   const plants = [
     {
       name: 'Rosal',
       scientific: 'Rosa × damascena',
       gradient: 'gradient-floral',
       light: '☀️',
-      lightLabel: 'Sol directo',
-      water: 'Cada 2d',
-      type: 'Floral',
+      lightLabel: t('landing.previewIdentifyLight'),
+      water: t('landing.previewIdentifyWater'),
+      type: t('landing.previewIdentify'),
       status: 'ok',
       src: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600&h=450&fit=crop&crop=center',
     },
@@ -152,9 +92,9 @@ function DashboardPlaceholder() {
       scientific: 'Ocimum basilicum',
       gradient: 'gradient-aromatica',
       light: '🌤',
-      lightLabel: 'Media sombra',
+      lightLabel: t('lightType.media_sombra'),
       water: 'Cada 3d',
-      type: 'Aromática',
+      type: t('plantType.aromatica'),
       status: 'today',
       src: 'https://images.unsplash.com/photo-1618375569909-3c8616cf7733?w=600&h=450&fit=crop&crop=center',
     },
@@ -163,9 +103,9 @@ function DashboardPlaceholder() {
       scientific: 'Aloe barbadensis',
       gradient: 'gradient-suculenta',
       light: '☀️',
-      lightLabel: 'Sol directo',
+      lightLabel: t('landing.previewIdentifyLight'),
       water: 'Cada 14d',
-      type: 'Suculenta',
+      type: t('plantType.suculenta'),
       status: 'ok',
       src: 'https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=600&h=450&fit=crop&crop=center',
     },
@@ -188,14 +128,14 @@ function DashboardPlaceholder() {
 
         {/* Dashboard content */}
         <div className="p-6 bg-cream-50">
-          {/* Stats row — matches real dashboard */}
+          {/* Stats row */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🌱</span>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">12</p>
-                  <p className="text-xs text-gray-600">Plantas vivas</p>
+                  <p className="text-xs text-gray-600">{t('dashboard.livePlants')}</p>
                 </div>
               </div>
             </div>
@@ -204,7 +144,7 @@ function DashboardPlaceholder() {
                 <span className="text-3xl">💧</span>
                 <div>
                   <p className="text-2xl font-bold text-botanical-700">3</p>
-                  <p className="text-xs text-gray-600">Necesitan riego hoy</p>
+                  <p className="text-xs text-gray-600">{t('dashboard.needWatering')}</p>
                 </div>
               </div>
             </div>
@@ -213,7 +153,7 @@ function DashboardPlaceholder() {
                 <span className="text-3xl">🔍</span>
                 <div>
                   <p className="text-2xl font-bold text-amber-600">2</p>
-                  <p className="text-xs text-gray-600">Germinaciones pendientes</p>
+                  <p className="text-xs text-gray-600">{t('dashboard.pendingGerminations')}</p>
                 </div>
               </div>
             </div>
@@ -222,19 +162,18 @@ function DashboardPlaceholder() {
           {/* Section header */}
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-serif text-sm font-bold text-gray-900">
-              Últimas plantas agregadas
+              {t('dashboard.latestPlants')}
             </h3>
-            <span className="text-xs text-botanical-600">Ver todas →</span>
+            <span className="text-xs text-botanical-600">{t('dashboard.viewAll')}</span>
           </div>
 
-          {/* Plant cards — matches PlantCard component */}
+          {/* Plant cards */}
           <div className="grid grid-cols-3 gap-4">
             {plants.map((plant) => (
               <div
                 key={plant.name}
                 className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100"
               >
-                {/* Image with gradient border */}
                 <div className={`${plant.gradient} p-1`}>
                   <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden">
                     <Image
@@ -244,22 +183,20 @@ function DashboardPlaceholder() {
                       className="object-cover"
                       sizes="250px"
                     />
-                    {/* Watering badge */}
                     <div className="absolute top-2 right-2">
                       {plant.status === 'today' ? (
                         <span className="badge-needs-water px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                          💧 Hoy toca
+                          💧 {t('plantCard.todayDue')}
                         </span>
                       ) : (
                         <span className="badge-alive px-2 py-0.5 rounded-full text-[10px] font-semibold">
-                          ✓ Al día
+                          ✓ {t('plantCard.upToDate')}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="p-3">
                   <h4 className="font-serif text-sm font-bold text-gray-900 mb-0.5">
                     {plant.name}
@@ -301,7 +238,23 @@ function DashboardPlaceholder() {
 
 export default function LandingPage() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const router = useRouter()
+
+  const features = [
+    { icon: Scan, title: t('landing.feature1Title'), description: t('landing.feature1Desc') },
+    { icon: ClipboardList, title: t('landing.feature2Title'), description: t('landing.feature2Desc') },
+    { icon: Droplets, title: t('landing.feature3Title'), description: t('landing.feature3Desc') },
+    { icon: Sprout, title: t('landing.feature4Title'), description: t('landing.feature4Desc') },
+    { icon: Leaf, title: t('landing.feature5Title'), description: t('landing.feature5Desc') },
+    { icon: BarChart3, title: t('landing.feature6Title'), description: t('landing.feature6Desc') },
+  ]
+
+  const steps = [
+    { number: '1', icon: Camera, title: t('landing.step1Title'), description: t('landing.step1Desc'), preview: 'photo' },
+    { number: '2', icon: Scan, title: t('landing.step2Title'), description: t('landing.step2Desc'), preview: 'identify' },
+    { number: '3', icon: Bell, title: t('landing.step3Title'), description: t('landing.step3Desc'), preview: 'alert' },
+  ]
 
   useEffect(() => {
     if (user) {
@@ -327,27 +280,25 @@ export default function LandingPage() {
               <Sprout className="w-8 h-8 text-botanical-600" />
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Tu jardín inteligente,
+              {t('landing.heroTitle1')}
               <br />
-              <span className="text-botanical-700">siempre bajo control</span>
+              <span className="text-botanical-700">{t('landing.heroTitle2')}</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Gestiona tus plantas con identificación por IA, alertas de riego
-              automáticas y un dashboard que te mantiene al día. Nunca más
-              olvides regar.
+              {t('landing.heroDescription')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
                 className="w-full sm:w-auto bg-botanical-600 hover:bg-botanical-700 text-white font-semibold py-3.5 px-8 rounded-xl transition-colors text-base"
               >
-                Registrarse gratis
+                {t('landing.ctaRegister')}
               </Link>
               <Link
                 href="/login"
                 className="w-full sm:w-auto bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 px-8 rounded-xl transition-colors text-base"
               >
-                Ya tengo cuenta
+                {t('landing.ctaLogin')}
               </Link>
             </div>
           </div>
@@ -362,12 +313,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-14">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Todo lo que necesitas para tu jardín
+              {t('landing.featuresTitle')}
             </h2>
             <p className="text-gray-700 text-lg max-w-2xl">
-              Desde la identificación por IA hasta el seguimiento de
-              germinaciones. Everbud centraliza el cuidado de tus plantas en un
-              solo lugar.
+              {t('landing.featuresDescription')}
             </p>
           </div>
 
@@ -400,10 +349,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-14">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              ¿Cómo funciona?
+              {t('landing.howItWorksTitle')}
             </h2>
             <p className="text-gray-700 text-lg max-w-2xl">
-              Tres pasos simples para tener tu jardín bajo control.
+              {t('landing.howItWorksDescription')}
             </p>
           </div>
 
@@ -441,17 +390,16 @@ export default function LandingPage() {
             <Sun className="w-7 h-7 text-botanical-600" />
           </div>
           <h2 className="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Empieza a cuidar tu jardín hoy
+            {t('landing.finalCtaTitle')}
           </h2>
           <p className="text-gray-700 text-lg mb-8 max-w-xl mx-auto">
-            Únete a Everbud y lleva el control de tus plantas con inteligencia
-            artificial. Gratis, sin tarjeta de crédito.
+            {t('landing.finalCtaDescription')}
           </p>
           <Link
             href="/register"
             className="inline-block bg-botanical-600 hover:bg-botanical-700 text-white font-semibold py-3.5 px-10 rounded-xl transition-colors text-base"
           >
-            Crear cuenta gratis
+            {t('landing.finalCtaButton')}
           </Link>
         </div>
       </section>

@@ -3,16 +3,16 @@ import { identifyPlantByName } from '@/lib/claude'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name } = await request.json()
+    const { name, locale } = await request.json()
 
     if (!name || typeof name !== 'string') {
       return NextResponse.json(
-        { error: 'Nombre de planta requerido' },
+        { error: locale === 'en' ? 'Plant name required' : 'Nombre de planta requerido' },
         { status: 400 }
       )
     }
 
-    const identification = await identifyPlantByName(name.trim())
+    const identification = await identifyPlantByName(name.trim(), locale || 'es')
     return NextResponse.json(identification)
   } catch (error) {
     console.error('Error identifying plant by name:', error)

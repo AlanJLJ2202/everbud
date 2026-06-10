@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import Link from 'next/link'
 
 export default function LoginPage() {
   const { signIn, signInWithGoogle } = useAuth()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -20,7 +22,7 @@ export default function LoginPage() {
 
     if (error) {
       setError(error === 'Invalid login credentials'
-        ? 'Email o contraseña incorrectos'
+        ? t('login.errorInvalid')
         : error
       )
       setLoading(false)
@@ -33,10 +35,10 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <span className="text-5xl block mb-4">🌿</span>
           <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">
-            Bienvenido de vuelta
+            {t('login.welcomeBack')}
           </h1>
           <p className="text-gray-600">
-            Inicia sesión para cuidar tu jardín
+            {t('login.subtitle')}
           </p>
         </div>
 
@@ -50,7 +52,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Email
+                {t('login.email')}
               </label>
               <input
                 id="email"
@@ -65,7 +67,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contraseña
+                {t('login.password')}
               </label>
               <input
                 id="password"
@@ -83,13 +85,13 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-botanical-600 hover:bg-botanical-700 disabled:bg-botanical-400 text-white font-medium py-3 px-4 rounded-xl transition-colors"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {loading ? t('login.submitting') : t('login.submit')}
             </button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
             <div className="flex-1 border-t border-gray-200" />
-            <span className="text-xs text-gray-500 uppercase tracking-wide">o</span>
+            <span className="text-xs text-gray-500 uppercase tracking-wide">{t('common.or')}</span>
             <div className="flex-1 border-t border-gray-200" />
           </div>
 
@@ -103,14 +105,14 @@ export default function LoginPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continuar con Google
+            {t('login.google')}
           </button>
         </div>
 
         <p className="text-center mt-6 text-sm text-gray-600">
-          ¿No tienes cuenta?{' '}
+          {t('login.noAccount')}{' '}
           <Link href="/register" className="text-botanical-600 hover:text-botanical-700 font-medium">
-            Crear cuenta
+            {t('login.createAccount')}
           </Link>
         </p>
       </div>

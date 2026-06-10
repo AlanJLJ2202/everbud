@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/context/LanguageContext'
 import PlantCard from '@/components/PlantCard'
 import CareLogForm from '@/components/CareLogForm'
 import WeatherBadge from '@/components/WeatherBadge'
@@ -13,15 +14,13 @@ import {
   CareLog,
   DeathCause,
   PlantWithCareStatus,
-  CARE_TYPE_LABELS,
-  CARE_TYPE_ICONS,
-  DEATH_CAUSE_EMOJI,
   Weather,
 } from '@/types'
 
 export default function PlantDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { t, locale } = useLanguage()
   const plantId = params.id as string
 
   const [plant, setPlant] = useState<Plant | null>(null)
@@ -34,6 +33,40 @@ export default function PlantDetailPage() {
   const [deathNotes, setDeathNotes] = useState('')
   const [isRecordingDeath, setIsRecordingDeath] = useState(false)
 
+  const careTypeLabels: Record<string, string> = {
+    riego: t('careType.riego'),
+    fertilizante: t('careType.fertilizante'),
+    poda: t('careType.poda'),
+    revision: t('careType.revision'),
+  }
+
+  const careTypeIcons: Record<string, string> = {
+    riego: '💧',
+    fertilizante: '🌱',
+    poda: '✂️',
+    revision: '🔍',
+  }
+
+  const deathCauseEmoji: Record<DeathCause, string> = {
+    sequia: '🏜️',
+    plaga: '🐛',
+    exceso_agua: '🌊',
+    frio: '🧊',
+    enfermedad: '🦠',
+    otro: '❓',
+  }
+
+  const deathCauseLabels: Record<DeathCause, string> = {
+    sequia: t('deathCause.sequia'),
+    plaga: t('deathCause.plaga'),
+    exceso_agua: t('deathCause.exceso_agua'),
+    frio: t('deathCause.frio'),
+    enfermedad: t('deathCause.enfermedad'),
+    otro: t('deathCause.otro'),
+  }
+
+  const dateLocale = locale === 'es' ? 'es-ES' : 'en-US'
+
   useEffect(() => {
     fetchPlantData()
   }, [plantId])
@@ -43,7 +76,6 @@ export default function PlantDetailPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch plant
       const { data: plantData, error: plantError } = await supabase
         .from('plants')
         .select('*')
@@ -53,7 +85,6 @@ export default function PlantDetailPage() {
       if (plantError) throw new Error(plantError.message)
       setPlant(plantData)
 
-      // Fetch care logs
       const { data: logsData, error: logsError } = await supabase
         .from('care_logs')
         .select('*')
@@ -64,7 +95,7 @@ export default function PlantDetailPage() {
       if (logsError) throw new Error(logsError.message)
       setCareLogs(logsData || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar la planta')
+      setError(err instanceof Error ? err.message : t('plantDetail.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -87,7 +118,6 @@ export default function PlantDetailPage() {
   async function handleRecordDeath() {
     setIsRecordingDeath(true)
     try {
-      // Create death log
       const { error: deathError } = await supabase.from('death_logs').insert({
         plant_id: plantId,
         cause: deathCause,
@@ -96,7 +126,6 @@ export default function PlantDetailPage() {
 
       if (deathError) throw new Error(deathError.message)
 
-      // Update plant status
       const { error: updateError } = await supabase
         .from('plants')
         .update({ status: 'dead' })
@@ -107,7 +136,7 @@ export default function PlantDetailPage() {
       router.push('/plants')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al registrar la muerte')
+      setError(err instanceof Error ? err.message : t('plantDetail.errorDeath'))
     } finally {
       setIsRecordingDeath(false)
     }
@@ -169,9 +198,9 @@ export default function PlantDetailPage() {
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="text-center">
           <span className="text-6xl block mb-4">😕</span>
-          <p className="text-gray-600">{error || 'Planta no encontrada'}</p>
+          <p className="text-gray-600">{error || t('plantDetail.notFound')}</p>
           <Link href="/plants" className="text-botanical-600 hover:underline mt-4 block">
-            ← Volver a mis plantas
+            {t('plantDetail.backToPlants')}
           </Link>
         </div>
       </div>
@@ -183,7 +212,7 @@ export default function PlantDetailPage() {
       <div className="max-w-2xl mx-auto">
         {/* Back Link */}
         <Link href="/plants" className="text-botanical-600 hover:underline mb-6 inline-block">
-          ← Volver a mis plantas
+          {t('plantDetail.backToPlants')}
         </Link>
 
         {/* Plant Card Large */}
@@ -201,13 +230,13 @@ export default function PlantDetailPage() {
             onClick={() => setShowCareForm(true)}
             className="flex-1 bg-botanical-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-botanical-700 transition-colors"
           >
-            💧 Registrar riego
+            {t('plantDetail.registerWatering')}
           </button>
           <button
             onClick={() => setShowDeathModal(true)}
             className="bg-red-100 text-red-800 py-3 px-4 rounded-xl font-semibold hover:bg-red-200 transition-colors"
           >
-            ⚠️ Murió
+            {t('plantDetail.died')}
           </button>
         </div>
 
@@ -215,7 +244,7 @@ export default function PlantDetailPage() {
         {showCareForm && (
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
             <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-              Registrar riego
+              {t('plantDetail.registerWatering').replace('💧 ', '')}
             </h2>
             <CareLogForm
               plantId={plantId}
@@ -230,14 +259,14 @@ export default function PlantDetailPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full">
               <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-                Registrar fallecimiento
+                {t('plantDetail.recordDeath')}
               </h2>
               <p className="text-gray-600 mb-4">
-                Lamentamos la pérdida de {plant.name}. ¿Cuál fue la causa?
+                {t('plantDetail.deathMessage', { name: plant.name })}
               </p>
 
               <div className="grid grid-cols-2 gap-2 mb-4">
-                {(Object.keys(DEATH_CAUSE_EMOJI) as DeathCause[]).map((cause) => (
+                {(Object.keys(deathCauseEmoji) as DeathCause[]).map((cause) => (
                   <button
                     key={cause}
                     onClick={() => setDeathCause(cause)}
@@ -247,8 +276,8 @@ export default function PlantDetailPage() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <span>{DEATH_CAUSE_EMOJI[cause]}</span>
-                    <span className="text-sm capitalize">{cause.replace('_', ' ')}</span>
+                    <span>{deathCauseEmoji[cause]}</span>
+                    <span className="text-sm capitalize">{deathCauseLabels[cause]}</span>
                   </button>
                 ))}
               </div>
@@ -256,7 +285,7 @@ export default function PlantDetailPage() {
               <textarea
                 value={deathNotes}
                 onChange={(e) => setDeathNotes(e.target.value)}
-                placeholder="Notas adicionales (opcional)"
+                placeholder={t('careLog.notesPlaceholder')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl mb-4 resize-none"
                 rows={3}
               />
@@ -267,13 +296,13 @@ export default function PlantDetailPage() {
                   disabled={isRecordingDeath}
                   className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
                 >
-                  {isRecordingDeath ? 'Registrando...' : 'Confirmar fallecimiento'}
+                  {isRecordingDeath ? t('plantDetail.recording') : t('plantDetail.confirmDeath')}
                 </button>
                 <button
                   onClick={() => setShowDeathModal(false)}
                   className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -284,7 +313,7 @@ export default function PlantDetailPage() {
         {plant.tips && plant.tips.length > 0 && (
           <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
             <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-              💡 Tips de cuidado
+              {t('plantDetail.careTips')}
             </h2>
             <ul className="space-y-2">
               {plant.tips.map((tip, index) => (
@@ -300,12 +329,12 @@ export default function PlantDetailPage() {
         {/* Care History */}
         <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
           <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
-            📋 Historial de cuidados
+            {t('plantDetail.careHistory')}
           </h2>
 
           {careLogs.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
-              No hay registros de cuidado aún
+              {t('plantDetail.noCareLogs')}
             </p>
           ) : (
             <div className="space-y-4">
@@ -314,16 +343,16 @@ export default function PlantDetailPage() {
                   key={log.id}
                   className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0"
                 >
-                  <span className="text-2xl">{CARE_TYPE_ICONS[log.care_type]}</span>
+                  <span className="text-2xl">{careTypeIcons[log.care_type] || '📋'}</span>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-900">
-                        {CARE_TYPE_LABELS[log.care_type]}
+                        {careTypeLabels[log.care_type] || log.care_type}
                       </span>
                       {log.weather && <WeatherBadge weather={log.weather} size="sm" />}
                     </div>
                     <p className="text-sm text-gray-500">
-                      {new Date(log.logged_at).toLocaleDateString('es-ES', {
+                      {new Date(log.logged_at).toLocaleDateString(dateLocale, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',

@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/context/LanguageContext'
 import PlantCard from '@/components/PlantCard'
-import { Plant, PlantWithCareStatus, CareLog } from '@/types'
+import { Plant, PlantWithCareStatus } from '@/types'
 
 export default function PlantsPage() {
+  const { t } = useLanguage()
   const [plants, setPlants] = useState<PlantWithCareStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -20,7 +22,6 @@ export default function PlantsPage() {
       setLoading(true)
       setError(null)
 
-      // Fetch alive plants
       const { data: plantsData, error: plantsError } = await supabase
         .from('plants')
         .select('*')
@@ -29,7 +30,6 @@ export default function PlantsPage() {
 
       if (plantsError) throw new Error(plantsError.message)
 
-      // Fetch last care log for each plant
       const plantsWithStatus: PlantWithCareStatus[] = await Promise.all(
         (plantsData || []).map(async (plant: Plant) => {
           const { data: careLogs } = await supabase
@@ -61,7 +61,6 @@ export default function PlantsPage() {
               overdueDays = daysSinceWatering - plant.water_every_days
             }
           } else if (!lastWateredAt && plant.water_every_days) {
-            // Never watered
             const created = new Date(plant.created_at)
             const now = new Date()
             const daysSinceCreation = Math.floor(
@@ -85,7 +84,7 @@ export default function PlantsPage() {
 
       setPlants(plantsWithStatus)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar plantas')
+      setError(err instanceof Error ? err.message : t('plants.errorLoading'))
     } finally {
       setLoading(false)
     }
@@ -98,17 +97,17 @@ export default function PlantsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-serif text-3xl font-bold text-gray-900">
-              🌿 Mis Plantas
+              {t('plants.title')}
             </h1>
             <p className="text-gray-600 mt-1">
-              {plants.length} {plants.length === 1 ? 'planta' : 'plantas'} en tu jardín
+              {plants.length} {t('plants.plantCount')}
             </p>
           </div>
           <Link
             href="/new-plant"
             className="bg-botanical-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-botanical-700 transition-colors"
           >
-            ➕ Nueva planta
+            {t('plants.newPlant')}
           </Link>
         </div>
 
@@ -123,23 +122,23 @@ export default function PlantsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="loading-spinner mb-4"></div>
-            <p className="text-gray-600">Cargando tus plantas...</p>
+            <p className="text-gray-600">{t('plants.loading')}</p>
           </div>
         ) : plants.length === 0 ? (
           /* Empty State */
           <div className="text-center py-20">
             <span className="text-8xl block mb-6">🌱</span>
             <h2 className="font-serif text-2xl font-bold text-gray-900 mb-3">
-              Tu jardín está vacío
+              {t('plants.emptyTitle')}
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Comienza agregando tu primera planta. Sube una foto y la IA la identificará automáticamente.
+              {t('plants.emptyDesc')}
             </p>
             <Link
               href="/new-plant"
               className="inline-block bg-botanical-600 text-white px-6 py-3 rounded-xl font-semibold text-lg hover:bg-botanical-700 transition-colors"
             >
-              🌱 Agregar primera planta
+              {t('plants.addFirst')}
             </Link>
           </div>
         ) : (

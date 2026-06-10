@@ -2,19 +2,21 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
+import { useLanguage } from '@/context/LanguageContext'
 import UserMenu from './UserMenu'
-
-const navLinks = [
-  { href: '/plants', label: 'Mis Plantas', emoji: '🌿' },
-  { href: '/germinations', label: 'Germinaciones', emoji: '🌱' },
-  { href: '/new-plant', label: 'Nueva planta', emoji: '➕' },
-  { href: '/cemetery', label: 'Cementerio', emoji: '💀' },
-]
 
 export default function AuthNav() {
   const { user, loading } = useAuth()
+  const { t } = useLanguage()
 
   if (loading) return null
+
+  const navLinks = [
+    { href: '/plants', label: t('nav.myPlants'), emoji: '🌿' },
+    { href: '/germinations', label: t('nav.germinations'), emoji: '🌱' },
+    { href: '/new-plant', label: t('nav.newPlant'), emoji: '➕' },
+    { href: '/cemetery', label: t('nav.cemetery'), emoji: '💀' },
+  ]
 
   if (!user) {
     return (
@@ -22,7 +24,7 @@ export default function AuthNav() {
         href="/login"
         className="bg-botanical-600 hover:bg-botanical-700 text-white font-medium py-2 px-5 rounded-xl transition-colors text-sm"
       >
-        Iniciar sesión
+        {t('nav.login')}
       </Link>
     )
   }
