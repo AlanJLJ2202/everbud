@@ -174,12 +174,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .panini-brand {
-  font-size: 11px;
+  font-size: clamp(8px, 2.4vw, 11px);
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #1a1a1a;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .panini-badge {
@@ -310,16 +312,16 @@ h1, h2, h3, h4, h5, h6 {
 
 .panini-name-light {
   font-weight: 300;
-  font-size: 13px;
+  font-size: clamp(10px, 2.8vw, 13px);
 }
 
 .panini-name-bold {
   font-weight: 800;
-  font-size: 16px;
+  font-size: clamp(12px, 3.5vw, 16px);
 }
 
 .panini-data {
-  font-size: 10px;
+  font-size: clamp(8px, 2.2vw, 10px);
   font-weight: 500;
   opacity: 0.92;
   margin-top: 1px;
@@ -359,6 +361,217 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 9px;
   font-weight: 800;
   font-style: normal;
+}
+
+/* Carta como botón en la colección pública */
+.collection-card-btn {
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.collection-card-btn:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================
+   PANINI CARD MODAL — carta a pantalla completa
+   ============================================================ */
+
+/* Overlay: fondo blur oscuro */
+.panini-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: rgba(10, 10, 18, 0.72);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  animation: modal-in 0.22s ease-out both;
+  overflow-y: auto;
+  flex-wrap: wrap;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Contenedor de la carta ampliada */
+.panini-modal-card-wrap {
+  flex-shrink: 0;
+  width: min(260px, 72vw);
+  animation: card-explode 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  filter: drop-shadow(0 0 40px rgba(255,255,255,0.18));
+}
+
+@keyframes card-explode {
+  0%   { transform: scale(0.25) rotate(-8deg); opacity: 0; }
+  60%  { transform: scale(1.1) rotate(1deg); opacity: 1; }
+  80%  { transform: scale(0.97) rotate(-0.5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* La carta dentro del modal es más grande */
+.panini-modal-card {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  cursor: default;
+  /* Todos los tipos con rareza legendaria tienen shimmer más intenso en modal */
+}
+
+.panini-modal-card:hover {
+  transform: none;
+}
+
+/* Efecto 3D suave de tilt al hover en el modal */
+.panini-modal-card-wrap:hover .panini-modal-card {
+  transform: perspective(600px) rotateY(4deg) rotateX(-2deg) scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+/* Holo extra en cualquier rareza dentro del modal */
+.panini-modal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+  border-radius: 10px;
+  background: linear-gradient(
+    125deg,
+    transparent 20%,
+    rgba(255,255,255,0.08) 35%,
+    rgba(120,220,255,0.12) 50%,
+    rgba(255,180,255,0.08) 65%,
+    transparent 80%
+  );
+  background-size: 200% 200%;
+  animation: holo-modal 4s linear infinite;
+}
+
+@keyframes holo-modal {
+  0%   { background-position: 150% 150%; }
+  100% { background-position: -50% -50%; }
+}
+
+/* Panel de información */
+.panini-modal-info {
+  position: relative;
+  width: min(340px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(15, 18, 30, 0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 1.75rem;
+  animation: info-slide 0.38s 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+@keyframes info-slide {
+  from { transform: translateX(30px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* Botón cerrar */
+.panini-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  line-height: 1;
+}
+
+.panini-modal-close:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* Chips de datos en el panel */
+.panini-info-chip {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panini-info-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.4);
+}
+
+.panini-info-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+}
+
+/* Responsive: en mobile apilar carta arriba, info abajo */
+@media (max-width: 640px) {
+  .panini-modal-overlay {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1.25rem 1rem 2rem;
+    gap: 1.25rem;
+  }
+
+  .panini-modal-card-wrap {
+    /* Carta centrada, no demasiado grande para que el panel quepa a la vista */
+    width: min(160px, 50vw);
+    /* Tilt 3D se deshabilita en touch */
+    pointer-events: none;
+  }
+
+  .panini-modal-card-wrap:hover .panini-modal-card {
+    transform: none;
+  }
+
+  .panini-modal-info {
+    width: 100%;
+    max-height: none;
+    /* En mobile el panel se desliza desde abajo */
+    animation: info-slide-up 0.35s 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+}
+
+@keyframes info-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Pantallas muy pequeñas (< 380px): carta aún más compacta */
+@media (max-width: 380px) {
+  .panini-modal-card-wrap {
+    width: min(140px, 46vw);
+  }
 }
 
 /* Status badges */

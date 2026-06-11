@@ -142,6 +142,7 @@
     "scientificName": "Nombre científico",
     "family": "Familia",
     "origin": "Origen",
+    "type": "Tipo",
     "editName": "✏️ Editar nombre",
     "deletePlant": "🗑️ Eliminar",
     "editNameTitle": "Editar nombre",
@@ -312,6 +313,7 @@
     "species": "Especies",
     "rarePlants": "Raras o superiores",
     "collection": "🌿 Colección",
+    "tapCard": "Toca una carta para ver detalles",
     "emptyGarden": "Este jardín aún no tiene plantas",
     "joinCta": "¿Te gusta este jardín? Crea el tuyo en Everbud",
     "joinButton": "Crear mi jardín gratis"
