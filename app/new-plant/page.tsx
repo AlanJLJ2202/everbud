@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { supabase, uploadImage } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuth } from '@/context/AuthContext'
 import { PlantIdentification } from '@/lib/claude'
 import { PlantType, LightType } from '@/types'
 
 export default function NewPlantPage() {
   const router = useRouter()
   const { t, locale } = useLanguage()
+  const { user } = useAuth()
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -176,6 +178,7 @@ export default function NewPlantPage() {
       const { data, error: insertError } = await supabase
         .from('plants')
         .insert({
+          user_id: user!.id,
           name: name.trim(),
           common_name: commonName.trim() || null,
           scientific_name: scientificName.trim() || null,

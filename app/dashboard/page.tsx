@@ -31,6 +31,7 @@ export default function DashboardPage() {
         .from('plants')
         .select('*')
         .eq('status', 'alive')
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
 
       const allPlants = plantsData || []
@@ -44,6 +45,7 @@ export default function DashboardPage() {
             .from('care_logs')
             .select('*')
             .eq('plant_id', plant.id)
+            .eq('user_id', user!.id)
             .eq('care_type', 'riego')
             .order('logged_at', { ascending: false })
             .limit(1)
@@ -98,6 +100,7 @@ export default function DashboardPage() {
         .from('germinations')
         .select('*')
         .eq('status', 'en_curso')
+        .eq('user_id', user!.id)
 
       let germinationDueCount = 0
       const now = new Date()

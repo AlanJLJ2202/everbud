@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuth } from '@/context/AuthContext'
 import PlantCard from '@/components/PlantCard'
 import { Plant, PlantWithCareStatus } from '@/types'
 
 export default function PlantsPage() {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const [plants, setPlants] = useState<PlantWithCareStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,6 +28,7 @@ export default function PlantsPage() {
         .from('plants')
         .select('*')
         .eq('status', 'alive')
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
 
       if (plantsError) throw new Error(plantsError.message)
@@ -36,6 +39,7 @@ export default function PlantsPage() {
             .from('care_logs')
             .select('*')
             .eq('plant_id', plant.id)
+            .eq('user_id', user!.id)
             .eq('care_type', 'riego')
             .order('logged_at', { ascending: false })
             .limit(1)

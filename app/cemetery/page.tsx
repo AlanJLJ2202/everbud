@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuth } from '@/context/AuthContext'
 import { Plant, DeathLog, DeathCause } from '@/types'
 
 interface DeadPlant {
@@ -14,6 +15,7 @@ interface DeadPlant {
 
 export default function CemeteryPage() {
   const { t, locale } = useLanguage()
+  const { user } = useAuth()
   const [deadPlants, setDeadPlants] = useState<DeadPlant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +53,7 @@ export default function CemeteryPage() {
         .from('plants')
         .select('*')
         .eq('status', 'dead')
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
 
       if (plantsError) throw new Error(plantsError.message)
@@ -61,6 +64,7 @@ export default function CemeteryPage() {
             .from('death_logs')
             .select('*')
             .eq('plant_id', plant.id)
+            .eq('user_id', user!.id)
             .order('died_at', { ascending: false })
             .limit(1)
 

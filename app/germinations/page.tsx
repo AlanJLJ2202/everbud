@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuth } from '@/context/AuthContext'
 import GerminationCard from '@/components/GerminationCard'
 import { Germination, GerminationWithStatus } from '@/types'
 
 export default function GerminationsPage() {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const [germinations, setGerminations] = useState<GerminationWithStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,6 +33,7 @@ export default function GerminationsPage() {
       const { data, error: fetchError } = await supabase
         .from('germinations')
         .select('*')
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
 
       if (fetchError) throw new Error(fetchError.message)
@@ -77,6 +80,7 @@ export default function GerminationsPage() {
     setIsSubmitting(true)
     try {
       const { error } = await supabase.from('germinations').insert({
+        user_id: user!.id,
         seed_name: seedName.trim(),
         started_at: startedAt,
         check_every_days: checkEveryDays,

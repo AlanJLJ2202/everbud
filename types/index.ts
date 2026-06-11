@@ -8,6 +8,7 @@ export type DeathCause = 'sequia' | 'plaga' | 'exceso_agua' | 'frio' | 'enfermed
 
 export interface Plant {
   id: string
+  user_id: string
   name: string
   common_name: string | null
   scientific_name: string | null
@@ -22,6 +23,7 @@ export interface Plant {
 
 export interface CareLog {
   id: string
+  user_id: string
   plant_id: string
   care_type: CareType
   weather: Weather | null
@@ -31,6 +33,7 @@ export interface CareLog {
 
 export interface Germination {
   id: string
+  user_id: string
   seed_name: string
   started_at: string
   check_every_days: number
@@ -42,6 +45,7 @@ export interface Germination {
 
 export interface DeathLog {
   id: string
+  user_id: string
   plant_id: string
   cause: DeathCause
   notes: string | null

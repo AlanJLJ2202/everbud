@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuth } from '@/context/AuthContext'
 import PlantCard from '@/components/PlantCard'
 import CareLogForm from '@/components/CareLogForm'
 import WeatherBadge from '@/components/WeatherBadge'
@@ -21,6 +22,7 @@ export default function PlantDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { t, locale } = useLanguage()
+  const { user } = useAuth()
   const plantId = params.id as string
 
   const [plant, setPlant] = useState<Plant | null>(null)
@@ -80,6 +82,7 @@ export default function PlantDetailPage() {
         .from('plants')
         .select('*')
         .eq('id', plantId)
+        .eq('user_id', user!.id)
         .single()
 
       if (plantError) throw new Error(plantError.message)
@@ -89,6 +92,7 @@ export default function PlantDetailPage() {
         .from('care_logs')
         .select('*')
         .eq('plant_id', plantId)
+        .eq('user_id', user!.id)
         .order('logged_at', { ascending: false })
         .limit(10)
 
@@ -103,6 +107,7 @@ export default function PlantDetailPage() {
 
   async function handleCareSubmit(data: { care_type: string; weather: Weather; notes: string }) {
     const { error } = await supabase.from('care_logs').insert({
+      user_id: user!.id,
       plant_id: plantId,
       care_type: data.care_type,
       weather: data.weather,
@@ -119,6 +124,7 @@ export default function PlantDetailPage() {
     setIsRecordingDeath(true)
     try {
       const { error: deathError } = await supabase.from('death_logs').insert({
+        user_id: user!.id,
         plant_id: plantId,
         cause: deathCause,
         notes: deathNotes || null,
