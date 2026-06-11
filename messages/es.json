@@ -141,7 +141,18 @@
     "story": "📖 Historia",
     "scientificName": "Nombre científico",
     "family": "Familia",
-    "origin": "Origen"
+    "origin": "Origen",
+    "editName": "✏️ Editar nombre",
+    "deletePlant": "🗑️ Eliminar",
+    "editNameTitle": "Editar nombre",
+    "editNameLabel": "Nombre de la planta",
+    "saving": "Guardando...",
+    "errorUpdate": "Error al actualizar la planta",
+    "deleteTitle": "Eliminar planta",
+    "deleteMessage": "¿Estás seguro de que quieres eliminar {name}? Esta acción no se puede deshacer.",
+    "deleteConfirm": "Eliminar",
+    "deleting": "Eliminando...",
+    "errorDelete": "Error al eliminar la planta"
   },
   "newPlant": {
     "title": "Nueva planta",

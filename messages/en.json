@@ -141,7 +141,18 @@
     "story": "📖 Story",
     "scientificName": "Scientific name",
     "family": "Family",
-    "origin": "Origin"
+    "origin": "Origin",
+    "editName": "✏️ Edit name",
+    "deletePlant": "🗑️ Delete",
+    "editNameTitle": "Edit name",
+    "editNameLabel": "Plant name",
+    "saving": "Saving...",
+    "errorUpdate": "Error updating plant",
+    "deleteTitle": "Delete plant",
+    "deleteMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
+    "deleteConfirm": "Delete",
+    "deleting": "Deleting...",
+    "errorDelete": "Error deleting plant"
   },
   "newPlant": {
     "title": "New plant",

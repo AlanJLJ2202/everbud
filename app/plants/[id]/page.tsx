@@ -17,6 +17,7 @@ import {
   PlantWithCareStatus,
   Weather,
 } from '@/types'
+import { Pencil, Trash2 } from 'lucide-react'
 
 export default function PlantDetailPage() {
   const params = useParams()
@@ -34,6 +35,11 @@ export default function PlantDetailPage() {
   const [deathCause, setDeathCause] = useState<DeathCause>('sequia')
   const [deathNotes, setDeathNotes] = useState('')
   const [isRecordingDeath, setIsRecordingDeath] = useState(false)
+  const [showEditName, setShowEditName] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [isSavingName, setIsSavingName] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const careTypeLabels: Record<string, string> = {
     riego: t('careType.riego'),
@@ -148,6 +154,45 @@ export default function PlantDetailPage() {
     }
   }
 
+  async function handleEditName() {
+    if (!editName.trim()) return
+    setIsSavingName(true)
+    try {
+      const { error } = await supabase
+        .from('plants')
+        .update({ name: editName.trim() })
+        .eq('id', plantId)
+
+      if (error) throw new Error(error.message)
+
+      setPlant((prev) => prev ? { ...prev, name: editName.trim() } : prev)
+      setShowEditName(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('plantDetail.errorUpdate'))
+    } finally {
+      setIsSavingName(false)
+    }
+  }
+
+  async function handleDeletePlant() {
+    setIsDeleting(true)
+    try {
+      const { error } = await supabase
+        .from('plants')
+        .delete()
+        .eq('id', plantId)
+
+      if (error) throw new Error(error.message)
+
+      router.push('/plants')
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('plantDetail.errorDelete'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   function getWateringStatus(): 'ok' | 'today' | 'overdue' {
     if (!plant?.water_every_days) return 'ok'
 
@@ -232,12 +277,26 @@ export default function PlantDetailPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-2 mb-8">
           <button
             onClick={() => setShowCareForm(true)}
             className="flex-1 bg-botanical-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-botanical-700 transition-colors"
           >
             {t('plantDetail.registerWatering')}
+          </button>
+          <button
+            onClick={() => { setEditName(plant.name); setShowEditName(true) }}
+            className="bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+            title={t('plantDetail.editName')}
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="bg-red-100 text-red-700 py-3 px-4 rounded-xl font-semibold hover:bg-red-200 transition-colors"
+            title={t('plantDetail.deletePlant')}
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => setShowDeathModal(true)}
@@ -307,6 +366,72 @@ export default function PlantDetailPage() {
                 </button>
                 <button
                   onClick={() => setShowDeathModal(false)}
+                  className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Name Modal */}
+        {showEditName && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+              <h2 className="font-serif text-xl font-bold text-gray-900 mb-4">
+                {t('plantDetail.editNameTitle')}
+              </h2>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('plantDetail.editNameLabel')}
+              </label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-botanical-500"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter') handleEditName() }}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEditName}
+                  disabled={isSavingName || !editName.trim()}
+                  className="flex-1 bg-botanical-600 text-white py-3 rounded-xl font-semibold hover:bg-botanical-700 transition-colors disabled:opacity-50"
+                >
+                  {isSavingName ? t('plantDetail.saving') : t('common.save')}
+                </button>
+                <button
+                  onClick={() => setShowEditName(false)}
+                  className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+              <h2 className="font-serif text-xl font-bold text-gray-900 mb-2">
+                {t('plantDetail.deleteTitle')}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {t('plantDetail.deleteMessage', { name: plant.name })}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeletePlant}
+                  disabled={isDeleting}
+                  className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? t('plantDetail.deleting') : t('plantDetail.deleteConfirm')}
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
                   className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50"
                 >
                   {t('common.cancel')}
