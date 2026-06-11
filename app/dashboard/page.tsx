@@ -24,8 +24,10 @@ export default function DashboardPage() {
   const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || ''
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    if (user) {
+      fetchDashboardData()
+    }
+  }, [user])
 
   async function fetchDashboardData() {
     try {
