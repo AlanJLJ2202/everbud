@@ -6,6 +6,7 @@ import {
   Plant,
   PlantWithCareStatus,
   PlantType,
+  Rarity,
 } from '@/types'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -13,32 +14,44 @@ interface PlantCardProps {
   plant: Plant | PlantWithCareStatus
   wateringStatus?: 'ok' | 'today' | 'overdue'
   overdueDays?: number
+  /** Pasa null para deshabilitar el link (ej. perfil público) */
+  href?: string | null
+  showWateringBadge?: boolean
 }
 
-function getGradientClass(type: PlantType | null): string {
-  switch (type) {
-    case 'frutal':
-      return 'gradient-frutal'
-    case 'floral':
-      return 'gradient-floral'
-    case 'suculenta':
-      return 'gradient-suculenta'
-    case 'aromatica':
-      return 'gradient-aromatica'
-    default:
-      return 'gradient-otro'
-  }
+const TYPE_CODES: Record<string, string> = {
+  frutal: 'FRU',
+  floral: 'FLO',
+  suculenta: 'SUC',
+  aromatica: 'ARO',
+  otro: 'BUD',
 }
 
-export default function PlantCard({ plant, wateringStatus = 'ok', overdueDays = 0 }: PlantCardProps) {
-  const { t, locale } = useLanguage()
-  const gradientClass = getGradientClass(plant.type)
+const TYPE_EMOJI: Record<string, string> = {
+  frutal: '🍊',
+  floral: '🌸',
+  suculenta: '🌵',
+  aromatica: '🌿',
+  otro: '🪴',
+}
 
-  const lightTypeLabels: Record<string, string> = {
-    sol_pleno: t('lightType.sol_pleno'),
-    media_sombra: t('lightType.media_sombra'),
-    sombra: t('lightType.sombra'),
-  }
+// Número de colección estable derivado del uuid de la planta (1-99)
+function getCollectionNumber(id: string): string {
+  const num = (parseInt(id.replace(/-/g, '').slice(0, 6), 16) % 99) + 1
+  return String(num).padStart(2, '0')
+}
+
+export default function PlantCard({
+  plant,
+  wateringStatus = 'ok',
+  overdueDays = 0,
+  href,
+  showWateringBadge = true,
+}: PlantCardProps) {
+  const { t } = useLanguage()
+  const type: PlantType = plant.type || 'otro'
+  const rarity: Rarity = plant.species?.rarity || 'comun'
+  const collectionNumber = getCollectionNumber(plant.id)
 
   const lightTypeIcons: Record<string, string> = {
     sol_pleno: '🌞',
@@ -46,110 +59,124 @@ export default function PlantCard({ plant, wateringStatus = 'ok', overdueDays = 
     sombra: '🌑',
   }
 
-  const plantTypeLabels: Record<string, string> = {
-    frutal: t('plantType.frutal'),
-    floral: t('plantType.floral'),
-    suculenta: t('plantType.suculenta'),
-    aromatica: t('plantType.aromatica'),
-    otro: t('plantType.otro'),
-  }
-
   const lightIcon = plant.light_type ? lightTypeIcons[plant.light_type] : '🌿'
-  const lightLabel = plant.light_type ? lightTypeLabels[plant.light_type] : t('common.undefined')
-  const typeLabel = plant.type ? plantTypeLabels[plant.type] : t('plantType.otro')
+  const lightLabel = plant.light_type
+    ? t(`lightType.${plant.light_type}`)
+    : t('common.undefined')
+  const typeLabel = t(`plantType.${type}`)
+  const rarityLabel = t(`rarity.${rarity}`)
+
+  // Estilo Panini: primera palabra light, el resto extra bold
+  const nameWords = plant.name.trim().split(/\s+/)
+  const firstWord = nameWords.length > 1 ? nameWords[0] : ''
+  const restWords = nameWords.length > 1 ? nameWords.slice(1).join(' ') : nameWords[0]
 
   function getWateringBadge() {
     switch (wateringStatus) {
       case 'ok':
         return (
-          <span className="badge-alive px-2 py-1 rounded-full text-xs font-semibold">
+          <span className="badge-alive px-2 py-0.5 rounded-full text-[10px] font-semibold">
             {t('plantCard.upToDate')}
           </span>
         )
       case 'today':
         return (
-          <span className="badge-needs-water px-2 py-1 rounded-full text-xs font-semibold">
+          <span className="badge-needs-water px-2 py-0.5 rounded-full text-[10px] font-semibold">
             {t('plantCard.todayDue')}
           </span>
         )
       case 'overdue':
         return (
-          <span className="badge-overdue px-2 py-1 rounded-full text-xs font-semibold">
+          <span className="badge-overdue px-2 py-0.5 rounded-full text-[10px] font-semibold">
             {t('plantCard.overdue', { days: overdueDays })}
           </span>
         )
     }
   }
 
-  return (
-    <Link href={`/plants/${plant.id}`} className="block">
-      <div className="plant-card grain-overlay bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
-        {/* Image Section with Gradient */}
-        <div className={`relative ${gradientClass} p-1`}>
-          <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden">
-            {plant.image_url ? (
-              <Image
-                src={plant.image_url}
-                alt={plant.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-6xl">🌿</span>
-              </div>
-            )}
-          </div>
+  const card = (
+    <article className={`panini-card panini-${type} rarity-${rarity}`}>
+      {/* Zona 1 — Header */}
+      <header className="panini-header">
+        <span className="panini-brand">
+          Everbud <span className="font-medium opacity-60">Garden Club</span>.
+        </span>
+        <span className="panini-badge">
+          <span className="panini-badge-code">{TYPE_CODES[type]}</span>
+          <span className="panini-badge-num">{collectionNumber}</span>
+        </span>
+      </header>
 
-          {/* Watering Status Badge */}
-          <div className="absolute top-3 right-3">
-            {getWateringBadge()}
-          </div>
+      {/* Zonas 2/3 — Número decorativo + foto */}
+      <div className="panini-body">
+        <svg
+          className="panini-deco"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
+          <text x="-6" y="86" fontSize="92">
+            {collectionNumber}
+          </text>
+        </svg>
+
+        <span className="panini-rarity-chip">{rarityLabel}</span>
+
+        {showWateringBadge && (
+          <span className="panini-status">{getWateringBadge()}</span>
+        )}
+
+        <div className="panini-photo">
+          {plant.image_url ? (
+            <Image
+              src={plant.image_url}
+              alt={plant.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-end justify-center pb-4">
+              <span className="text-6xl">{TYPE_EMOJI[type]}</span>
+            </div>
+          )}
         </div>
 
-        {/* Content Section */}
-        <div className="p-4">
-          {/* Plant Name */}
-          <h3 className="font-serif text-xl font-bold text-gray-900 mb-1">
-            {plant.name}
-          </h3>
+        <span className="panini-flag">{TYPE_EMOJI[type]}</span>
+      </div>
 
-          {/* Scientific Name */}
-          {plant.scientific_name && (
-            <p className="text-sm text-gray-500 italic mb-3">
-              {plant.scientific_name}
-            </p>
-          )}
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-2">
-            {/* Light Type */}
-            <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-              <span className="text-lg">{lightIcon}</span>
-              <span className="text-[10px] text-gray-600 mt-1 text-center leading-tight">
-                {lightLabel}
-              </span>
-            </div>
-
-            {/* Water Frequency */}
-            <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-              <span className="text-lg">💧</span>
-              <span className="text-[10px] text-gray-600 mt-1 text-center leading-tight">
-                {plant.water_every_days ? t('plantCard.everyDays', { days: plant.water_every_days }) : t('common.undefined')}
-              </span>
-            </div>
-
-            {/* Plant Type */}
-            <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-              <span className="text-lg">🌿</span>
-              <span className="text-[10px] text-gray-600 mt-1 text-center leading-tight">
-                {typeLabel}
-              </span>
-            </div>
-          </div>
+      {/* Zona 4 — Pill de nombre + datos */}
+      <div className="panini-pill panini-pill-name">
+        <div className="panini-name">
+          {firstWord && <span className="panini-name-light">{firstWord} </span>}
+          <span className="panini-name-bold">{restWords}</span>
+        </div>
+        <div className="panini-data">
+          💧{' '}
+          {plant.water_every_days
+            ? t('plantCard.everyDays', { days: plant.water_every_days })
+            : t('common.undefined')}{' '}
+          | {lightIcon} {lightLabel}
         </div>
       </div>
+
+      {/* Zona 5 — Pill de club (especie) + logo */}
+      <div className="panini-pill panini-pill-club">
+        <span className="panini-club-name">
+          {plant.scientific_name || typeLabel}
+        </span>
+        <span className="panini-logo">🌿 EVERBUD</span>
+      </div>
+    </article>
+  )
+
+  if (href === null) {
+    return card
+  }
+
+  return (
+    <Link href={href ?? `/plants/${plant.id}`} className="block">
+      {card}
     </Link>
   )
 }

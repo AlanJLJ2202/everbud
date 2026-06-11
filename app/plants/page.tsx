@@ -26,7 +26,7 @@ export default function PlantsPage() {
 
       const { data: plantsData, error: plantsError } = await supabase
         .from('plants')
-        .select('*')
+        .select('*, species(*)')
         .eq('status', 'alive')
         .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
@@ -147,7 +147,7 @@ export default function PlantsPage() {
           </div>
         ) : (
           /* Plants Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {plants.map((plant) => (
               <PlantCard
                 key={plant.id}

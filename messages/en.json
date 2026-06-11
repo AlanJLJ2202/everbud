@@ -137,7 +137,11 @@
     "confirmDeath": "Confirm death",
     "recording": "Recording...",
     "errorDeath": "Error recording death",
-    "errorLoading": "Error loading plant"
+    "errorLoading": "Error loading plant",
+    "story": "📖 Story",
+    "scientificName": "Scientific name",
+    "family": "Family",
+    "origin": "Origin"
   },
   "newPlant": {
     "title": "New plant",
@@ -167,7 +171,12 @@
     "saving": "Saving plant...",
     "errorNameRequired": "Plant name is required",
     "errorIdentify": "Error identifying plant",
-    "errorSave": "Error saving plant"
+    "errorSave": "Error saving plant",
+    "rarity": "Rarity",
+    "story": "Story / About",
+    "storyPlaceholder": "Story of the species: origin, fun facts, cultural meaning...",
+    "speciesExists": "This species is already in the global Everbud catalog. Your plant will be linked to that record.",
+    "speciesLocked": "Species data comes from the global Everbud catalog."
   },
   "germinations": {
     "title": "🌱 Germinations",
@@ -262,5 +271,38 @@
     "alta": "high",
     "media": "medium",
     "baja": "low"
+  },
+  "rarity": {
+    "comun": "Common",
+    "poco_comun": "Uncommon",
+    "rara": "Rare",
+    "muy_rara": "Very rare",
+    "legendaria": "Legendary"
+  },
+  "level": {
+    "principiante": "Beginner",
+    "intermedio": "Intermediate",
+    "experto": "Expert",
+    "gran_maestro": "Grand Master",
+    "points": "{points} pts",
+    "nextLevel": "{points} pts to {level} level",
+    "maxLevel": "Max level reached!"
+  },
+  "profile": {
+    "share": "Share profile",
+    "shareDescription": "Share your garden link with your friends:",
+    "copyLink": "Copy",
+    "copied": "Copied!",
+    "username": "Username",
+    "usernameHint": "3 to 30 characters: letters, numbers and underscore",
+    "errorUsername": "That username is not available",
+    "memberSince": "Member since {date}",
+    "plants": "Plants",
+    "species": "Species",
+    "rarePlants": "Rare or better",
+    "collection": "🌿 Collection",
+    "emptyGarden": "This garden has no plants yet",
+    "joinCta": "Like this garden? Create your own on Everbud",
+    "joinButton": "Create my garden for free"
   }
 }

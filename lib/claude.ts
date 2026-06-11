@@ -11,7 +11,23 @@ export interface PlantIdentification {
   light_type: 'sol_pleno' | 'media_sombra' | 'sombra'
   water_every_days: number
   tips: string[]
+  rarity: 'comun' | 'poco_comun' | 'rara' | 'muy_rara' | 'legendaria'
+  story: string
+  family: string
+  origin: string
   confidence: 'alta' | 'media' | 'baja'
+}
+
+const VALID_RARITIES = ['comun', 'poco_comun', 'rara', 'muy_rara', 'legendaria']
+
+function normalizeIdentification(result: PlantIdentification): PlantIdentification {
+  if (!result.rarity || !VALID_RARITIES.includes(result.rarity)) {
+    result.rarity = 'comun'
+  }
+  result.story = result.story || ''
+  result.family = result.family || ''
+  result.origin = result.origin || ''
+  return result
 }
 
 const localeInstructions: Record<string, string> = {
@@ -24,7 +40,7 @@ export async function identifyPlant(base64Image: string, mediaType: string, loca
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
+    max_tokens: 1600,
     messages: [
       {
         role: 'user',
@@ -51,10 +67,16 @@ El JSON debe tener exactamente estas keys:
   "light_type": "uno de: sol_pleno | media_sombra | sombra",
   "water_every_days": número entero de días entre riegos,
   "tips": ["tip 1", "tip 2", "tip 3", "tip 4", "tip 5"],
+  "rarity": "uno de: comun | poco_comun | rara | muy_rara | legendaria",
+  "story": "historia breve de la especie (3-4 frases): origen, curiosidades, usos o significado cultural",
+  "family": "familia botánica (ej. Rosaceae)",
+  "origin": "región geográfica de origen",
   "confidence": "alta | media | baja"
 }
 
-IMPORTANTE: Los valores de "type", "light_type" y "confidence" DEBEN estar en español (son valores del sistema). Solo "common_name" y "tips" deben estar en el idioma indicado.
+IMPORTANTE: Los valores de "type", "light_type", "rarity" y "confidence" DEBEN estar en español (son valores del sistema). Solo "common_name", "tips", "story" y "origin" deben estar en el idioma indicado.
+
+Para "rarity" evalúa qué tan común es la especie como planta de cultivo doméstico: comun (se ve en cualquier casa), poco_comun, rara, muy_rara, legendaria (extremadamente difícil de conseguir o en peligro).
 
 Si no puedes identificar la planta con certeza, usa confidence: "baja" y da tu mejor estimación. Los tips deben ser prácticos, cortos (máx 15 palabras cada uno).`,
           },
@@ -91,7 +113,7 @@ Si no puedes identificar la planta con certeza, usa confidence: "baja" y da tu m
       result.tips = []
     }
 
-    return result
+    return normalizeIdentification(result)
   } catch (parseError) {
     console.error('Failed to parse Claude response:', jsonText)
     throw new Error('No se pudo identificar la planta')
@@ -103,7 +125,7 @@ export async function identifyPlantByName(plantName: string, locale: string = 'e
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
+    max_tokens: 1600,
     messages: [
       {
         role: 'user',
@@ -119,10 +141,16 @@ El JSON debe tener exactamente estas keys:
   "light_type": "uno de: sol_pleno | media_sombra | sombra",
   "water_every_days": número entero de días entre riegos,
   "tips": ["tip 1", "tip 2", "tip 3", "tip 4", "tip 5"],
+  "rarity": "uno de: comun | poco_comun | rara | muy_rara | legendaria",
+  "story": "historia breve de la especie (3-4 frases): origen, curiosidades, usos o significado cultural",
+  "family": "familia botánica (ej. Rosaceae)",
+  "origin": "región geográfica de origen",
   "confidence": "alta"
 }
 
-IMPORTANTE: Los valores de "type", "light_type" y "confidence" DEBEN estar en español (son valores del sistema). Solo "common_name" y "tips" deben estar en el idioma indicado.
+IMPORTANTE: Los valores de "type", "light_type", "rarity" y "confidence" DEBEN estar en español (son valores del sistema). Solo "common_name", "tips", "story" y "origin" deben estar en el idioma indicado.
+
+Para "rarity" evalúa qué tan común es la especie como planta de cultivo doméstico: comun (se ve en cualquier casa), poco_comun, rara, muy_rara, legendaria (extremadamente difícil de conseguir o en peligro).
 
 Si no estás seguro de la planta, usa confidence: "media" o "baja". Los tips deben ser prácticos, cortos (máx 15 palabras cada uno).`,
       },
@@ -157,7 +185,7 @@ Si no estás seguro de la planta, usa confidence: "media" o "baja". Los tips deb
       result.tips = []
     }
 
-    return result
+    return normalizeIdentification(result)
   } catch (parseError) {
     console.error('Failed to parse Claude response:', jsonText)
     throw new Error('No se pudo identificar la planta')

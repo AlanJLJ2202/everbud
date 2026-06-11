@@ -6,6 +6,9 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/context/AuthContext'
 import { useLanguage } from '@/context/LanguageContext'
 import PlantCard from '@/components/PlantCard'
+import GardenerLevelBadge from '@/components/GardenerLevelBadge'
+import ShareProfileButton from '@/components/ShareProfileButton'
+import { computeGardenerStats, GamificationStats } from '@/lib/gamification'
 import { Plant, PlantWithCareStatus } from '@/types'
 
 export default function DashboardPage() {
@@ -16,6 +19,7 @@ export default function DashboardPage() {
   const [needsWatering, setNeedsWatering] = useState(0)
   const [germinationsDue, setGerminationsDue] = useState(0)
   const [totalPlants, setTotalPlants] = useState(0)
+  const [gamification, setGamification] = useState<GamificationStats | null>(null)
   const [loading, setLoading] = useState(true)
   const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || ''
 
@@ -29,12 +33,14 @@ export default function DashboardPage() {
 
       const { data: plantsData } = await supabase
         .from('plants')
-        .select('*')
-        .eq('status', 'alive')
+        .select('*, species(*)')
         .eq('user_id', user!.id)
         .order('created_at', { ascending: false })
 
-      const allPlants = plantsData || []
+      const allRows: Plant[] = plantsData || []
+      setGamification(computeGardenerStats(allRows))
+
+      const allPlants = allRows.filter((p) => p.status === 'alive')
       setTotalPlants(allPlants.length)
       setRecentPlants(allPlants.slice(0, 3))
 
@@ -135,13 +141,23 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-cream-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-serif text-4xl font-bold text-gray-900">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {userName ? t('dashboard.welcome', { name: userName }) : t('dashboard.welcomeDefault')}
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-4xl font-bold text-gray-900">
+              {t('dashboard.title')}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {userName ? t('dashboard.welcome', { name: userName }) : t('dashboard.welcomeDefault')}
+            </p>
+            <div className="mt-3">
+              <ShareProfileButton />
+            </div>
+          </div>
+          {gamification && (
+            <div className="sm:w-80 w-full">
+              <GardenerLevelBadge stats={gamification} />
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -219,7 +235,7 @@ export default function DashboardPage() {
               <p className="text-gray-600">{t('dashboard.addFirstPlant')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
               {recentPlants.map((plant) => {
                 const plantWithStatus = plants.find((p) => p.id === plant.id)
                 return (

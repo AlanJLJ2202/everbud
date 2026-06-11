@@ -7,7 +7,7 @@ import { supabase, uploadImage } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { PlantIdentification } from '@/lib/claude'
-import { PlantType, LightType } from '@/types'
+import { PlantType, LightType, Rarity, Species } from '@/types'
 
 export default function NewPlantPage() {
   const router = useRouter()
@@ -32,6 +32,11 @@ export default function NewPlantPage() {
   const [lightType, setLightType] = useState<LightType>('sol_pleno')
   const [waterEveryDays, setWaterEveryDays] = useState(3)
   const [tips, setTips] = useState<string[]>([])
+  const [rarity, setRarity] = useState<Rarity>('comun')
+  const [story, setStory] = useState('')
+  const [family, setFamily] = useState('')
+  const [origin, setOrigin] = useState('')
+  const [existingSpecies, setExistingSpecies] = useState<Species | null>(null)
 
   const plantTypeLabels: Record<PlantType, string> = {
     frutal: t('plantType.frutal'),
@@ -45,6 +50,55 @@ export default function NewPlantPage() {
     sol_pleno: t('lightType.sol_pleno'),
     media_sombra: t('lightType.media_sombra'),
     sombra: t('lightType.sombra'),
+  }
+
+  const rarityLabels: Record<Rarity, string> = {
+    comun: t('rarity.comun'),
+    poco_comun: t('rarity.poco_comun'),
+    rara: t('rarity.rara'),
+    muy_rara: t('rarity.muy_rara'),
+    legendaria: t('rarity.legendaria'),
+  }
+
+  // Aplica el resultado de la IA; si la especie ya existe en el catálogo
+  // global de Everbud, usa esos datos y solo se vinculará al guardar
+  const applyIdentification = async (result: PlantIdentification) => {
+    setIdentification(result)
+
+    let species: Species | null = null
+    if (result.scientific_name) {
+      const { data } = await supabase
+        .from('species')
+        .select('*')
+        .ilike('scientific_name', result.scientific_name.trim())
+        .maybeSingle()
+      species = (data as Species | null) || null
+    }
+    setExistingSpecies(species)
+
+    if (species) {
+      setCommonName(species.common_name || result.common_name)
+      setScientificName(species.scientific_name)
+      setPlantType(species.type || result.type)
+      setLightType(species.light_type || result.light_type)
+      setWaterEveryDays(species.water_every_days || result.water_every_days)
+      setTips(species.tips && species.tips.length > 0 ? species.tips : result.tips)
+      setRarity(species.rarity || result.rarity)
+      setStory(species.story || result.story)
+      setFamily(species.family || result.family)
+      setOrigin(species.origin || result.origin)
+    } else {
+      setCommonName(result.common_name)
+      setScientificName(result.scientific_name)
+      setPlantType(result.type)
+      setLightType(result.light_type)
+      setWaterEveryDays(result.water_every_days)
+      setTips(result.tips)
+      setRarity(result.rarity)
+      setStory(result.story)
+      setFamily(result.family)
+      setOrigin(result.origin)
+    }
   }
 
   const processImage = async (file: File) => {
@@ -75,14 +129,7 @@ export default function NewPlantPage() {
       }
 
       const result: PlantIdentification = await response.json()
-      setIdentification(result)
-
-      setCommonName(result.common_name)
-      setScientificName(result.scientific_name)
-      setPlantType(result.type)
-      setLightType(result.light_type)
-      setWaterEveryDays(result.water_every_days)
-      setTips(result.tips)
+      await applyIdentification(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('newPlant.errorIdentify'))
     } finally {
@@ -138,13 +185,7 @@ export default function NewPlantPage() {
       }
 
       const result: PlantIdentification = await response.json()
-      setIdentification(result)
-      setCommonName(result.common_name)
-      setScientificName(result.scientific_name)
-      setPlantType(result.type)
-      setLightType(result.light_type)
-      setWaterEveryDays(result.water_every_days)
-      setTips(result.tips)
+      await applyIdentification(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('newPlant.errorIdentify'))
     } finally {
@@ -175,10 +216,51 @@ export default function NewPlantPage() {
         imageUrl = await uploadImage(imageFile)
       }
 
+      // Vincular al registro global de especies, o crearlo si es la primera vez
+      let speciesId: string | null = existingSpecies?.id ?? null
+
+      if (!speciesId && scientificName.trim()) {
+        const { data: newSpecies, error: speciesError } = await supabase
+          .from('species')
+          .insert({
+            scientific_name: scientificName.trim(),
+            common_name: commonName.trim() || null,
+            type: plantType,
+            light_type: lightType,
+            water_every_days: waterEveryDays,
+            tips: tips.filter((t) => t.trim()),
+            rarity,
+            story: story.trim() || null,
+            family: family.trim() || null,
+            origin: origin.trim() || null,
+            image_url: imageUrl,
+            created_by: user!.id,
+          })
+          .select()
+          .single()
+
+        if (speciesError) {
+          // 23505 = otro usuario registró la especie primero: vincular a la existente
+          if (speciesError.code === '23505') {
+            const { data: raced } = await supabase
+              .from('species')
+              .select('id')
+              .ilike('scientific_name', scientificName.trim())
+              .maybeSingle()
+            speciesId = raced?.id ?? null
+          } else {
+            throw new Error(speciesError.message)
+          }
+        } else {
+          speciesId = newSpecies.id
+        }
+      }
+
       const { data, error: insertError } = await supabase
         .from('plants')
         .insert({
           user_id: user!.id,
+          species_id: speciesId,
           name: name.trim(),
           common_name: commonName.trim() || null,
           scientific_name: scientificName.trim() || null,
@@ -211,6 +293,11 @@ export default function NewPlantPage() {
     setIdentification(null)
     setPlantNameInput('')
     setError(null)
+    setExistingSpecies(null)
+    setRarity('comun')
+    setStory('')
+    setFamily('')
+    setOrigin('')
     if (cameraInputRef.current) cameraInputRef.current.value = ''
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -370,6 +457,11 @@ export default function NewPlantPage() {
             <p className="text-sm text-green-700">
               {identification.common_name} ({identification.scientific_name})
             </p>
+            {existingSpecies && (
+              <p className="text-sm text-green-800 mt-2 flex items-center gap-1">
+                <span>📚</span> {t('newPlant.speciesExists')}
+              </p>
+            )}
           </div>
         )}
 
@@ -457,19 +549,58 @@ export default function NewPlantPage() {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="waterDays" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('newPlant.waterDays')}
+                </label>
+                <input
+                  type="number"
+                  id="waterDays"
+                  value={waterEveryDays}
+                  onChange={(e) => setWaterEveryDays(parseInt(e.target.value) || 1)}
+                  min={1}
+                  max={30}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="rarity" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('newPlant.rarity')}
+                </label>
+                <select
+                  id="rarity"
+                  value={rarity}
+                  onChange={(e) => setRarity(e.target.value as Rarity)}
+                  disabled={!!existingSpecies}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                >
+                  {(Object.keys(rarityLabels) as Rarity[]).map((r) => (
+                    <option key={r} value={r}>
+                      {rarityLabels[r]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label htmlFor="waterDays" className="block text-sm font-medium text-gray-700 mb-1">
-                {t('newPlant.waterDays')}
+              <label htmlFor="story" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('newPlant.story')}
               </label>
-              <input
-                type="number"
-                id="waterDays"
-                value={waterEveryDays}
-                onChange={(e) => setWaterEveryDays(parseInt(e.target.value) || 1)}
-                min={1}
-                max={30}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent"
+              <textarea
+                id="story"
+                value={story}
+                onChange={(e) => setStory(e.target.value)}
+                disabled={!!existingSpecies}
+                placeholder={t('newPlant.storyPlaceholder')}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-botanical-500 focus:border-transparent resize-none text-sm disabled:bg-gray-50 disabled:text-gray-500"
               />
+              {existingSpecies && (
+                <p className="text-xs text-gray-500 mt-1">{t('newPlant.speciesLocked')}</p>
+              )}
             </div>
 
             {tips.length > 0 && (

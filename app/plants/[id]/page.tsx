@@ -80,7 +80,7 @@ export default function PlantDetailPage() {
 
       const { data: plantData, error: plantError } = await supabase
         .from('plants')
-        .select('*')
+        .select('*, species(*)')
         .eq('id', plantId)
         .eq('user_id', user!.id)
         .single()
@@ -222,11 +222,12 @@ export default function PlantDetailPage() {
         </Link>
 
         {/* Plant Card Large */}
-        <div className="mb-8">
+        <div className="mb-8 max-w-xs mx-auto">
           <PlantCard
             plant={plant}
             wateringStatus={getWateringStatus()}
             overdueDays={getOverdueDays()}
+            href={null}
           />
         </div>
 
@@ -311,6 +312,50 @@ export default function PlantDetailPage() {
                   {t('common.cancel')}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Species Info: rareza, historia, ficha */}
+        {plant.species && (
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-serif text-xl font-bold text-gray-900">
+                {t('plantDetail.story')}
+              </h2>
+              <span
+                className={`rarity-${plant.species.rarity} px-3 py-1 rounded-full text-xs font-bold text-white uppercase tracking-wide`}
+                style={{ background: 'var(--panini-rarity)' }}
+              >
+                {t(`rarity.${plant.species.rarity}`)}
+              </span>
+            </div>
+
+            {plant.species.story && (
+              <p className="text-gray-700 leading-relaxed mb-4">
+                {plant.species.story}
+              </p>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {plant.species.scientific_name && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-gray-500 text-xs">{t('plantDetail.scientificName')}</p>
+                  <p className="text-gray-900 font-medium italic">{plant.species.scientific_name}</p>
+                </div>
+              )}
+              {plant.species.family && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-gray-500 text-xs">{t('plantDetail.family')}</p>
+                  <p className="text-gray-900 font-medium">{plant.species.family}</p>
+                </div>
+              )}
+              {plant.species.origin && (
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-gray-500 text-xs">{t('plantDetail.origin')}</p>
+                  <p className="text-gray-900 font-medium">{plant.species.origin}</p>
+                </div>
+              )}
             </div>
           </div>
         )}

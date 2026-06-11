@@ -137,7 +137,11 @@
     "confirmDeath": "Confirmar fallecimiento",
     "recording": "Registrando...",
     "errorDeath": "Error al registrar la muerte",
-    "errorLoading": "Error al cargar la planta"
+    "errorLoading": "Error al cargar la planta",
+    "story": "📖 Historia",
+    "scientificName": "Nombre científico",
+    "family": "Familia",
+    "origin": "Origen"
   },
   "newPlant": {
     "title": "Nueva planta",
@@ -167,7 +171,12 @@
     "saving": "Guardando planta...",
     "errorNameRequired": "El nombre de la planta es requerido",
     "errorIdentify": "Error al identificar la planta",
-    "errorSave": "Error al guardar la planta"
+    "errorSave": "Error al guardar la planta",
+    "rarity": "Rareza",
+    "story": "Historia / About",
+    "storyPlaceholder": "Historia de la especie: origen, curiosidades, significado cultural...",
+    "speciesExists": "Esta especie ya está en el catálogo global de Everbud. Tu planta se vinculará a ese registro.",
+    "speciesLocked": "Los datos de la especie vienen del catálogo global de Everbud."
   },
   "germinations": {
     "title": "🌱 Germinaciones",
@@ -262,5 +271,38 @@
     "alta": "alta",
     "media": "media",
     "baja": "baja"
+  },
+  "rarity": {
+    "comun": "Común",
+    "poco_comun": "Poco común",
+    "rara": "Rara",
+    "muy_rara": "Muy rara",
+    "legendaria": "Legendaria"
+  },
+  "level": {
+    "principiante": "Principiante",
+    "intermedio": "Intermedio",
+    "experto": "Experto",
+    "gran_maestro": "Gran Maestro",
+    "points": "{points} pts",
+    "nextLevel": "{points} pts para nivel {level}",
+    "maxLevel": "¡Nivel máximo alcanzado!"
+  },
+  "profile": {
+    "share": "Compartir perfil",
+    "shareDescription": "Comparte el link de tu jardín con tus amigos:",
+    "copyLink": "Copiar",
+    "copied": "¡Copiado!",
+    "username": "Nombre de usuario",
+    "usernameHint": "De 3 a 30 caracteres: letras, números y guion bajo",
+    "errorUsername": "Ese nombre de usuario no está disponible",
+    "memberSince": "Miembro desde {date}",
+    "plants": "Plantas",
+    "species": "Especies",
+    "rarePlants": "Raras o superiores",
+    "collection": "🌿 Colección",
+    "emptyGarden": "Este jardín aún no tiene plantas",
+    "joinCta": "¿Te gusta este jardín? Crea el tuyo en Everbud",
+    "joinButton": "Crear mi jardín gratis"
   }
 }

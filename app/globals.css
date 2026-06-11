@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,700&family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -75,6 +75,290 @@ h1, h2, h3, h4, h5, h6 {
 .plant-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================
+   PANINI CARD — estampita coleccionable (ratio 2:3 portrait)
+   ============================================================ */
+.panini-card {
+  --panini-bg: #82cedf;
+  --panini-deco: #5bb8d4;
+  --panini-pill: #1a8fa0;
+  --panini-rarity: #6b7280;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 2 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panini-bg);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.25);
+  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panini-card:hover {
+  transform: translateY(-6px) rotate(-1deg);
+  box-shadow: 8px 14px 28px rgba(0, 0, 0, 0.3);
+}
+
+/* Paletas por tipo de planta (fondo / número deco / pills) */
+.panini-frutal {
+  --panini-bg: #ffe0ad;
+  --panini-deco: #f59e0b;
+  --panini-pill: #b45309;
+}
+.panini-floral {
+  --panini-bg: #fad2e6;
+  --panini-deco: #ec4899;
+  --panini-pill: #be185d;
+}
+.panini-suculenta {
+  --panini-bg: #bde8d8;
+  --panini-deco: #10b981;
+  --panini-pill: #0f766e;
+}
+.panini-aromatica {
+  --panini-bg: #ded4f7;
+  --panini-deco: #8b5cf6;
+  --panini-pill: #6d28d9;
+}
+.panini-otro {
+  --panini-bg: #82cedf;
+  --panini-deco: #5bb8d4;
+  --panini-pill: #1a8fa0;
+}
+
+/* Colores de rareza */
+.rarity-comun { --panini-rarity: #6b7280; }
+.rarity-poco_comun { --panini-rarity: #16a34a; }
+.rarity-rara { --panini-rarity: #2563eb; }
+.rarity-muy_rara { --panini-rarity: #9333ea; }
+.rarity-legendaria { --panini-rarity: #d97706; }
+
+/* Legendaria: borde dorado + brillo holográfico */
+.panini-card.rarity-legendaria {
+  box-shadow: 0 0 0 2px #f5c200, 4px 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.panini-card.rarity-legendaria::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 45%,
+    transparent 60%
+  );
+  background-size: 250% 250%;
+  animation: holo-shine 3.5s ease-in-out infinite;
+}
+
+@keyframes holo-shine {
+  0% { background-position: 120% 120%; }
+  60% { background-position: -60% -60%; }
+  100% { background-position: -60% -60%; }
+}
+
+/* Zona 1 — header blanco */
+.panini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 5px 10px;
+  z-index: 10;
+}
+
+.panini-brand {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.panini-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  background: #1a1a1a;
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 4px 9px;
+}
+
+.panini-badge-code {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.panini-badge-num {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* Zona 2/3 — cuerpo con número deco gigante + foto */
+.panini-body {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panini-deco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.panini-deco text {
+  fill: var(--panini-deco);
+  opacity: 0.55;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+}
+
+.panini-photo {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  height: 84%;
+  border-radius: 50% 50% 0 0 / 36% 36% 0 0;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-bottom: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.35);
+  z-index: 5;
+}
+
+.panini-flag {
+  position: absolute;
+  right: 5%;
+  top: 36%;
+  width: 17%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--panini-pill);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.9rem, 2.2vw, 1.3rem);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  z-index: 8;
+}
+
+.panini-rarity-chip {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  z-index: 20;
+  background: var(--panini-rarity);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.panini-status {
+  position: absolute;
+  top: 4%;
+  right: 4%;
+  z-index: 20;
+}
+
+/* Zonas 4 y 5 — pills apiladas */
+.panini-pill {
+  position: relative;
+  z-index: 15;
+  background: var(--panini-pill);
+  color: #ffffff;
+  margin: 0 6px;
+  border-radius: 10px;
+  padding: 5px 10px;
+}
+
+.panini-pill-name {
+  margin-top: -8px;
+  text-align: center;
+}
+
+.panini-name {
+  text-transform: uppercase;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panini-name-light {
+  font-weight: 300;
+  font-size: 13px;
+}
+
+.panini-name-bold {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.panini-data {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.92;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panini-pill-club {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 3px 6px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.panini-club-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+
+.panini-logo {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #ffffff;
+  color: #1a1a1a;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 800;
+  font-style: normal;
 }
 
 /* Status badges */

@@ -39,7 +39,23 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/fonts') ||
     pathname.includes('.')
 
-  if (isStaticFile || isApiAuthRoute) {
+  // Perfiles públicos: /<username> (un solo segmento que no sea ruta de la app)
+  const RESERVED_PATHS = [
+    'dashboard',
+    'plants',
+    'germinations',
+    'cemetery',
+    'new-plant',
+    'login',
+    'register',
+    'profile',
+    'api',
+  ]
+  const profileMatch = pathname.match(/^\/([A-Za-z0-9_]+)\/?$/)
+  const isPublicProfile =
+    !!profileMatch && !RESERVED_PATHS.includes(profileMatch[1].toLowerCase())
+
+  if (isStaticFile || isApiAuthRoute || isPublicProfile) {
     return supabaseResponse
   }
 
