@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
 
   const isPublicRoute = pathname === '/' || pathname === '/login' || pathname === '/register'
   const isApiAuthRoute = pathname.startsWith('/api/auth')
+  const isAuthCallback = pathname.startsWith('/auth')
   const isStaticFile =
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -55,7 +56,7 @@ export async function middleware(request: NextRequest) {
   const isPublicProfile =
     !!profileMatch && !RESERVED_PATHS.includes(profileMatch[1].toLowerCase())
 
-  if (isStaticFile || isApiAuthRoute || isPublicProfile) {
+  if (isStaticFile || isApiAuthRoute || isAuthCallback || isPublicProfile) {
     return supabaseResponse
   }
 
