@@ -157,6 +157,23 @@
     "share": "Share",
     "shareCopied": "Link copied!"
   },
+  "plantStats": {
+    "title": "Statistics",
+    "hydration": "Hydration",
+    "daysSinceWater": "Last watered {days}d ago",
+    "noWaterData": "No watering records",
+    "consistency": "Consistency",
+    "caresRegistered": "cares",
+    "trend": {
+      "improving": "improving",
+      "stable": "stable",
+      "declining": "declining"
+    },
+    "weather": "Weather",
+    "weatherRecords": "{count} records",
+    "noWeatherData": "No weather data",
+    "timeline30d": "Last 30 days"
+  },
   "newPlant": {
     "title": "New plant",
     "takePhoto": "Take photo",

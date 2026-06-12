@@ -157,6 +157,23 @@
     "share": "Compartir",
     "shareCopied": "¡Link copiado!"
   },
+  "plantStats": {
+    "title": "Estadísticas",
+    "hydration": "Hidratación",
+    "daysSinceWater": "Último riego hace {days}d",
+    "noWaterData": "Sin registros de riego",
+    "consistency": "Consistencia",
+    "caresRegistered": "cuidados",
+    "trend": {
+      "improving": "mejorando",
+      "stable": "estable",
+      "declining": "empeorando"
+    },
+    "weather": "Clima",
+    "weatherRecords": "{count} registros",
+    "noWeatherData": "Sin datos de clima",
+    "timeline30d": "Últimos 30 días"
+  },
   "newPlant": {
     "title": "Nueva planta",
     "takePhoto": "Tomar foto",

@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import PlantCard from '@/components/PlantCard'
+import PlantStats from '@/components/PlantStats'
 import CareLogForm from '@/components/CareLogForm'
 import WeatherBadge from '@/components/WeatherBadge'
 import {
@@ -298,6 +299,9 @@ export default function PlantDetailPage() {
             href={null}
           />
         </div>
+
+        {/* Plant Stats */}
+        <PlantStats plant={plant} careLogs={careLogs} />
 
         {/* Action Buttons */}
         <div className="flex gap-2 mb-8">
