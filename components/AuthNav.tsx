@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { useLanguage } from '@/context/LanguageContext'
 import UserMenu from './UserMenu'
+import LanguageToggle from './LanguageToggle'
 
 export default function AuthNav() {
   const { user, loading } = useAuth()
@@ -19,13 +20,18 @@ export default function AuthNav() {
   ]
 
   if (!user) {
+    // Sin sesión (landing, login, register, perfiles públicos) el selector de
+    // idioma debe seguir disponible: aquí vive fuera de UserMenu
     return (
-      <Link
-        href="/login"
-        className="bg-botanical-600 hover:bg-botanical-700 text-white font-medium py-2 px-5 rounded-xl transition-colors text-sm"
-      >
-        {t('nav.login')}
-      </Link>
+      <div className="flex items-center gap-3">
+        <LanguageToggle />
+        <Link
+          href="/login"
+          className="bg-botanical-600 hover:bg-botanical-700 text-white font-medium py-2 px-5 rounded-xl transition-colors text-sm"
+        >
+          {t('nav.login')}
+        </Link>
+      </div>
     )
   }
 

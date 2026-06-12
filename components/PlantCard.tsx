@@ -175,7 +175,7 @@ export default function PlantCard({
   }
 
   return (
-    <Link href={href ?? `/plants/${plant.id}`} className="block">
+    <Link href={href ?? `/plants/${plant.slug ?? plant.id}`} className="block">
       {card}
     </Link>
   )

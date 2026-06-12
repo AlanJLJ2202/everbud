@@ -153,7 +153,9 @@
     "deleteMessage": "Are you sure you want to delete {name}? This action cannot be undone.",
     "deleteConfirm": "Delete",
     "deleting": "Deleting...",
-    "errorDelete": "Error deleting plant"
+    "errorDelete": "Error deleting plant",
+    "share": "Share",
+    "shareCopied": "Link copied!"
   },
   "newPlant": {
     "title": "New plant",
@@ -188,7 +190,11 @@
     "story": "Story / About",
     "storyPlaceholder": "Story of the species: origin, fun facts, cultural meaning...",
     "speciesExists": "This species is already in the global Everbud catalog. Your plant will be linked to that record.",
-    "speciesLocked": "Species data comes from the global Everbud catalog."
+    "speciesLocked": "Species data comes from the global Everbud catalog.",
+    "errorUnsupportedFormat": "Unsupported image format. Please use JPG, PNG, WebP or GIF.",
+    "errorHeicConversion": "We couldn't convert your HEIC photo. Try exporting it as JPG or take a screenshot.",
+    "errorFileTooLarge": "The image is too large (20 MB max).",
+    "convertingHeic": "Converting your photo..."
   },
   "germinations": {
     "title": "🌱 Germinations",
@@ -317,5 +323,26 @@
     "emptyGarden": "This garden has no plants yet",
     "joinCta": "Like this garden? Create your own on Everbud",
     "joinButton": "Create my garden for free"
+  },
+  "camera": {
+    "title": "Take photo",
+    "requesting": "Requesting camera access...",
+    "capture": "📸 Capture",
+    "denied": "Camera permission was denied",
+    "deniedHint": "You can enable it from the lock icon in the address bar, or upload a photo from your device.",
+    "unavailable": "No camera available",
+    "useFileInstead": "Upload a photo instead"
+  },
+  "publicPlant": {
+    "by": "From the garden of",
+    "viewGarden": "View full garden",
+    "story": "Story",
+    "careTips": "Care tips",
+    "scientificName": "Scientific name",
+    "family": "Family",
+    "origin": "Origin",
+    "privateNotice": "Your profile is private: this link is only visible to you. Make it public from \"Share profile\" so others can see it.",
+    "notFound": "This plant doesn't exist or its garden is private",
+    "cta": "Like this plant? Create your own garden on Everbud 🌿"
   }
 }

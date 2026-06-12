@@ -47,6 +47,7 @@ export interface Plant {
   tips: string[] | null
   image_url: string | null
   status: PlantStatus
+  slug: string | null
   created_at: string
   species?: Species | null
 }

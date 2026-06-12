@@ -51,12 +51,17 @@ export async function middleware(request: NextRequest) {
     'register',
     'profile',
     'api',
+    'p',
   ]
   const profileMatch = pathname.match(/^\/([A-Za-z0-9_]+)\/?$/)
   const isPublicProfile =
     !!profileMatch && !RESERVED_PATHS.includes(profileMatch[1].toLowerCase())
 
-  if (isStaticFile || isApiAuthRoute || isAuthCallback || isPublicProfile) {
+  // Plantas compartidas: /p/<slug> es público (solo muestra generalidades;
+  // RLS limita el acceso a plantas de perfiles públicos)
+  const isPublicPlant = pathname === '/p' || pathname.startsWith('/p/')
+
+  if (isStaticFile || isApiAuthRoute || isAuthCallback || isPublicProfile || isPublicPlant) {
     return supabaseResponse
   }
 

@@ -17,14 +17,18 @@ import {
   PlantWithCareStatus,
   Weather,
 } from '@/types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Share2 } from 'lucide-react'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export default function PlantDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { t, locale } = useLanguage()
   const { user } = useAuth()
-  const plantId = params.id as string
+  // Acepta tanto el slug legible (monstera-deliciosa-8f14e4) como el UUID
+  // para no romper links antiguos
+  const routeParam = params.id as string
 
   const [plant, setPlant] = useState<Plant | null>(null)
   const [careLogs, setCareLogs] = useState<CareLog[]>([])
@@ -40,6 +44,25 @@ export default function PlantDetailPage() {
   const [isSavingName, setIsSavingName] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
+
+  // Link público con solo generalidades de la planta (sin kardex ni datos
+  // personales); requiere que el perfil del usuario sea público
+  async function handleShare() {
+    if (!plant?.slug) return
+    const url = `${window.location.origin}/p/${plant.slug}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: plant.name, url })
+        return
+      } catch {
+        // El usuario canceló el share sheet: cae al portapapeles
+      }
+    }
+    await navigator.clipboard.writeText(url)
+    setShareCopied(true)
+    setTimeout(() => setShareCopied(false), 2000)
+  }
 
   const careTypeLabels: Record<string, string> = {
     riego: t('careType.riego'),
@@ -77,7 +100,7 @@ export default function PlantDetailPage() {
 
   useEffect(() => {
     fetchPlantData()
-  }, [plantId])
+  }, [routeParam])
 
   async function fetchPlantData() {
     try {
@@ -87,7 +110,7 @@ export default function PlantDetailPage() {
       const { data: plantData, error: plantError } = await supabase
         .from('plants')
         .select('*, species(*)')
-        .eq('id', plantId)
+        .eq(UUID_REGEX.test(routeParam) ? 'id' : 'slug', routeParam)
         .eq('user_id', user!.id)
         .single()
 
@@ -97,7 +120,7 @@ export default function PlantDetailPage() {
       const { data: logsData, error: logsError } = await supabase
         .from('care_logs')
         .select('*')
-        .eq('plant_id', plantId)
+        .eq('plant_id', plantData.id)
         .eq('user_id', user!.id)
         .order('logged_at', { ascending: false })
         .limit(10)
@@ -114,7 +137,7 @@ export default function PlantDetailPage() {
   async function handleCareSubmit(data: { care_type: string; weather: Weather; notes: string }) {
     const { error } = await supabase.from('care_logs').insert({
       user_id: user!.id,
-      plant_id: plantId,
+      plant_id: plant!.id,
       care_type: data.care_type,
       weather: data.weather,
       notes: data.notes || null,
@@ -131,7 +154,7 @@ export default function PlantDetailPage() {
     try {
       const { error: deathError } = await supabase.from('death_logs').insert({
         user_id: user!.id,
-        plant_id: plantId,
+        plant_id: plant!.id,
         cause: deathCause,
         notes: deathNotes || null,
       })
@@ -141,7 +164,7 @@ export default function PlantDetailPage() {
       const { error: updateError } = await supabase
         .from('plants')
         .update({ status: 'dead' })
-        .eq('id', plantId)
+        .eq('id', plant!.id)
 
       if (updateError) throw new Error(updateError.message)
 
@@ -161,7 +184,7 @@ export default function PlantDetailPage() {
       const { error } = await supabase
         .from('plants')
         .update({ name: editName.trim() })
-        .eq('id', plantId)
+        .eq('id', plant!.id)
 
       if (error) throw new Error(error.message)
 
@@ -180,7 +203,7 @@ export default function PlantDetailPage() {
       const { error } = await supabase
         .from('plants')
         .delete()
-        .eq('id', plantId)
+        .eq('id', plant!.id)
 
       if (error) throw new Error(error.message)
 
@@ -284,6 +307,18 @@ export default function PlantDetailPage() {
           >
             {t('plantDetail.registerWatering')}
           </button>
+          {plant.slug && (
+            <button
+              onClick={handleShare}
+              className="bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+              title={t('plantDetail.share')}
+            >
+              <Share2 className="w-4 h-4" />
+              {shareCopied && (
+                <span className="text-xs text-botanical-700">{t('plantDetail.shareCopied')}</span>
+              )}
+            </button>
+          )}
           <button
             onClick={() => { setEditName(plant.name); setShowEditName(true) }}
             className="bg-gray-100 text-gray-700 py-3 px-4 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
@@ -313,7 +348,7 @@ export default function PlantDetailPage() {
               {t('plantDetail.registerWatering').replace('💧 ', '')}
             </h2>
             <CareLogForm
-              plantId={plantId}
+              plantId={plant.id}
               onSubmit={handleCareSubmit}
               onCancel={() => setShowCareForm(false)}
             />

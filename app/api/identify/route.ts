@@ -14,13 +14,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get media type from file
+    const mediaType = image.type || 'image/jpeg'
+
+    // Claude Vision solo acepta estos formatos; los HEIC se convierten en el
+    // cliente, pero validamos también aquí por si llega algo directo a la API
+    const SUPPORTED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!SUPPORTED_MEDIA_TYPES.includes(mediaType)) {
+      return NextResponse.json(
+        {
+          error:
+            locale === 'en'
+              ? 'Unsupported image format. Please use JPG, PNG, WebP or GIF.'
+              : 'Formato de imagen no soportado. Usa JPG, PNG, WebP o GIF.',
+        },
+        { status: 415 }
+      )
+    }
+
     // Convert image to base64
     const bytes = await image.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64Image = buffer.toString('base64')
-
-    // Get media type from file
-    const mediaType = image.type || 'image/jpeg'
 
     // Call Claude Vision to identify the plant
     const identification = await identifyPlant(base64Image, mediaType, locale)

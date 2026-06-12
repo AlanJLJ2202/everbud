@@ -153,7 +153,9 @@
     "deleteMessage": "¿Estás seguro de que quieres eliminar {name}? Esta acción no se puede deshacer.",
     "deleteConfirm": "Eliminar",
     "deleting": "Eliminando...",
-    "errorDelete": "Error al eliminar la planta"
+    "errorDelete": "Error al eliminar la planta",
+    "share": "Compartir",
+    "shareCopied": "¡Link copiado!"
   },
   "newPlant": {
     "title": "Nueva planta",
@@ -188,7 +190,11 @@
     "story": "Historia / About",
     "storyPlaceholder": "Historia de la especie: origen, curiosidades, significado cultural...",
     "speciesExists": "Esta especie ya está en el catálogo global de Everbud. Tu planta se vinculará a ese registro.",
-    "speciesLocked": "Los datos de la especie vienen del catálogo global de Everbud."
+    "speciesLocked": "Los datos de la especie vienen del catálogo global de Everbud.",
+    "errorUnsupportedFormat": "Formato de imagen no soportado. Usa JPG, PNG, WebP o GIF.",
+    "errorHeicConversion": "No pudimos convertir tu foto HEIC. Intenta exportarla como JPG o toma una captura de pantalla.",
+    "errorFileTooLarge": "La imagen es demasiado grande (máximo 20 MB).",
+    "convertingHeic": "Convirtiendo tu foto..."
   },
   "germinations": {
     "title": "🌱 Germinaciones",
@@ -317,5 +323,26 @@
     "emptyGarden": "Este jardín aún no tiene plantas",
     "joinCta": "¿Te gusta este jardín? Crea el tuyo en Everbud",
     "joinButton": "Crear mi jardín gratis"
+  },
+  "camera": {
+    "title": "Tomar foto",
+    "requesting": "Solicitando acceso a la cámara...",
+    "capture": "📸 Capturar",
+    "denied": "No diste permiso para usar la cámara",
+    "deniedHint": "Puedes habilitarla desde el ícono de candado en la barra de direcciones, o subir una foto desde tu dispositivo.",
+    "unavailable": "No encontramos una cámara disponible",
+    "useFileInstead": "Subir una foto en su lugar"
+  },
+  "publicPlant": {
+    "by": "Del jardín de",
+    "viewGarden": "Ver jardín completo",
+    "story": "Historia",
+    "careTips": "Tips de cuidado",
+    "scientificName": "Nombre científico",
+    "family": "Familia",
+    "origin": "Origen",
+    "privateNotice": "Tu perfil es privado: este link solo es visible para ti. Hazlo público desde \"Compartir perfil\" para que otros lo vean.",
+    "notFound": "Esta planta no existe o su jardín es privado",
+    "cta": "¿Te gusta esta planta? Crea tu propio jardín en Everbud 🌿"
   }
 }

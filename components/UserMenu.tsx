@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useLanguage } from '@/context/LanguageContext'
+import LanguageToggle from './LanguageToggle'
 
 export default function UserMenu() {
   const { user, signOut } = useAuth()
-  const { t, locale, setLocale } = useLanguage()
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -25,16 +26,7 @@ export default function UserMenu() {
 
   return (
     <div className="relative flex items-center gap-2" ref={menuRef}>
-      {/* Language Toggle */}
-      <button
-        onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
-        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600"
-        title={locale === 'es' ? 'Switch to English' : 'Cambiar a Español'}
-      >
-        <span className={locale === 'es' ? 'text-botanical-700' : 'text-gray-400'}>ES</span>
-        <span className="text-gray-300">|</span>
-        <span className={locale === 'en' ? 'text-botanical-700' : 'text-gray-400'}>EN</span>
-      </button>
+      <LanguageToggle />
 
       <button
         onClick={() => setOpen(!open)}

@@ -7,6 +7,8 @@ import { supabase, uploadImage } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { PlantIdentification } from '@/lib/claude'
+import { prepareImageForUpload, ImageProcessingError } from '@/lib/image'
+import CameraCapture from '@/components/CameraCapture'
 import { PlantType, LightType, Rarity, Species } from '@/types'
 
 export default function NewPlantPage() {
@@ -24,6 +26,7 @@ export default function NewPlantPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [plantNameInput, setPlantNameInput] = useState('')
   const [isIdentifyingByName, setIsIdentifyingByName] = useState(false)
+  const [showCamera, setShowCamera] = useState(false)
 
   const [name, setName] = useState('')
   const [commonName, setCommonName] = useState('')
@@ -101,10 +104,32 @@ export default function NewPlantPage() {
     }
   }
 
-  const processImage = async (file: File) => {
-    setImageFile(file)
+  const imageErrorMessages: Record<string, string> = {
+    unsupported_format: t('newPlant.errorUnsupportedFormat'),
+    heic_conversion_failed: t('newPlant.errorHeicConversion'),
+    file_too_large: t('newPlant.errorFileTooLarge'),
+  }
+
+  const processImage = async (rawFile: File) => {
     setError(null)
     setIdentification(null)
+    setIsIdentifying(true)
+
+    let file: File
+    try {
+      // Valida formato/tamaño y convierte HEIC (iPhone) a JPEG
+      file = await prepareImageForUpload(rawFile)
+    } catch (err) {
+      setIsIdentifying(false)
+      setError(
+        err instanceof ImageProcessingError
+          ? imageErrorMessages[err.code]
+          : t('newPlant.errorIdentify')
+      )
+      return
+    }
+
+    setImageFile(file)
 
     const reader = new FileReader()
     reader.onloadend = () => {
@@ -112,7 +137,6 @@ export default function NewPlantPage() {
     }
     reader.readAsDataURL(file)
 
-    setIsIdentifying(true)
     try {
       const formData = new FormData()
       formData.append('image', file)
@@ -142,6 +166,17 @@ export default function NewPlantPage() {
     if (file) processImage(file)
   }
 
+  // En móvil el input con capture abre la app de cámara nativa (el SO gestiona
+  // el permiso); en desktop usamos getUserMedia con UI propia para el permiso
+  const handleTakePhoto = () => {
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+    if (isTouchDevice || !navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click()
+    } else {
+      setShowCamera(true)
+    }
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) processImage(file)
@@ -161,7 +196,9 @@ export default function NewPlantPage() {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith('image/')) {
+    // No filtrar por file.type aquí: los HEIC suelen llegar con type vacío
+    // y prepareImageForUpload ya valida y convierte lo que haga falta
+    if (file) {
       processImage(file)
     }
   }
@@ -329,9 +366,23 @@ export default function NewPlantPage() {
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
           />
+
+          {showCamera && (
+            <CameraCapture
+              onCapture={(file) => {
+                setShowCamera(false)
+                processImage(file)
+              }}
+              onClose={() => setShowCamera(false)}
+              onUseFileInstead={() => {
+                setShowCamera(false)
+                fileInputRef.current?.click()
+              }}
+            />
+          )}
 
           {!imagePreview ? (
             <div
@@ -346,7 +397,7 @@ export default function NewPlantPage() {
             >
               <div className="flex flex-col sm:flex-row justify-center gap-3 mb-4">
                 <button
-                  onClick={() => cameraInputRef.current?.click()}
+                  onClick={handleTakePhoto}
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-botanical-600 text-white rounded-xl hover:bg-botanical-700 transition-colors font-medium"
                 >
                   {t('newPlant.takePhoto')}

@@ -38,12 +38,14 @@ Los aficionados a la jardinería olvidan cuándo regaron, cuándo fertilizaron o
 - **Rareza** — 5 niveles: Común · Poco común · Rara · Muy rara · Legendaria. Afecta el diseño visual de la carta y los puntos de gamificación.
 - **Perfil público compartible** — `everbud.vercel.app/<username>` muestra tu colección, nivel de jardinero y estadísticas. Sin necesidad de login para verlo. Tu username es personalizable.
 - **Gamificación** — 4 niveles de jardinero: 🌱 Principiante → 🌿 Intermedio → 🌳 Experto → 🏆 Gran Maestro. Los puntos se calculan según la rareza de tus plantas y la diversidad de especies. Barra de progreso visible en el dashboard y en tu perfil público.
-- **Identificación por IA** — Sube una foto o escribe el nombre y Claude Vision identifica la especie, tipo, luz, riego, rareza, historia, familia y origen.
+- **Identificación por IA** — Sube una foto (incluyendo HEIC de iPhone, que se convierte automáticamente) o escribe el nombre y Claude Vision identifica la especie, tipo, luz, riego, rareza, historia, familia y origen.
+- **Cámara integrada** — Toma la foto directamente desde el navegador; gestiona el permiso de cámara con guía clara si el usuario lo deniega.
+- **Plantas compartibles** — Cada planta tiene una URL legible (`/p/monstera-deliciosa-8f14e4`) lista para compartir por WhatsApp, redes sociales o chat. Solo muestra datos generales de la especie, nunca el kardex.
 - **Registro de cuidados** — Riego, fertilización, poda y revisiones con condiciones climáticas e historial.
 - **Seguimiento de germinaciones** — Monitoreo de semillas con alertas de revisión configurables.
 - **Cementerio de plantas** — Registro de bajas con causa de muerte.
 - **Dashboard inteligente** — Stats en tiempo real, plantas que necesitan riego y tu nivel de jardinero.
-- **Multiidioma** — Español e inglés con detección automática del navegador.
+- **Multiidioma** — Español e inglés en todas las pantallas (incluyendo las públicas y sin sesión) con detección automática del navegador.
 
 ## 🇬🇧 Description
 
@@ -61,12 +63,14 @@ Gardening enthusiasts forget when they last watered, fertilized, or which seeds 
 - **Rarity** — 5 levels: Common · Uncommon · Rare · Very rare · Legendary. Affects card visual design and gamification points.
 - **Shareable public profile** — `everbud.vercel.app/<username>` shows your collection, gardener level and stats. No login required to view. Username is customizable.
 - **Gamification** — 4 gardener levels: 🌱 Beginner → 🌿 Intermediate → 🌳 Expert → 🏆 Grand Master. Points are calculated based on plant rarity and species diversity. Progress bar visible on the dashboard and public profile.
-- **AI Identification** — Upload a photo or type the name and Claude Vision identifies species, type, light, watering, rarity, story, family and origin.
+- **AI Identification** — Upload a photo (including HEIC from iPhone, auto-converted) or type the name and Claude Vision identifies species, type, light, watering, rarity, story, family and origin.
+- **Built-in camera** — Take a photo straight from the browser; handles camera permissions gracefully with clear guidance if the user denies access.
+- **Shareable plant pages** — Every plant gets a readable URL (`/p/monstera-deliciosa-8f14e4`) ready to share on WhatsApp, social media or chat. Shows only species info, never the care log.
 - **Care logging** — Watering, fertilization, pruning and inspections with weather conditions and history.
 - **Germination tracking** — Seed monitoring with configurable review alerts.
 - **Plant cemetery** — Death registry with cause of death.
 - **Smart dashboard** — Real-time stats, plants needing water and your gardener level.
-- **Multilingual** — Spanish and English with automatic browser detection.
+- **Multilingual** — Spanish and English on every screen (including public and logged-out pages) with automatic browser detection.
 
 ---
 
@@ -80,7 +84,7 @@ Gardening enthusiasts forget when they last watered, fertilized, or which seeds 
 | **Base de datos** | Supabase (PostgreSQL) | Almacenamiento relacional con Row Level Security |
 | **Storage** | Supabase Storage | Imágenes de plantas con acceso público |
 | **Autenticación** | Supabase Auth | Registro, sesiones y auto-creación de perfil |
-| **IA** | Anthropic Claude API (Vision) | Identificación, rareza, historia y datos botánicos |
+| **IA** | Anthropic Claude API (Vision + Chat) | Identificación, rareza, historia, diagnóstico botánico y chat Bud 🌱 |
 | **Hosting** | Vercel | Despliegue continuo con integración Git |
 | **Runtime** | React 18 | Interfaz reactiva con hooks |
 
@@ -89,19 +93,21 @@ Gardening enthusiasts forget when they last watered, fertilized, or which seeds 
 ## 🏗️ Arquitectura del Proyecto / Project Structure
 
 ```
-plant-manager/
+everbud/
 ├── app/
-│   ├── layout.tsx                # Layout raíz con navegación
+│   ├── layout.tsx                # Layout raíz con navegación y selector de idioma
 │   ├── page.tsx                  # Landing page
 │   ├── globals.css               # Estilos globales, gradientes y estilos Panini
 │   ├── [username]/               # Perfil público (everbud.vercel.app/alan)
+│   │   └── page.tsx
+│   ├── p/[slug]/                 # Planta pública compartible (/p/rosa-gallica-8f14e4)
 │   │   └── page.tsx
 │   ├── dashboard/                # Dashboard del usuario
 │   │   └── page.tsx
 │   ├── plants/
 │   │   ├── page.tsx              # Grid de cartas Panini
-│   │   └── [id]/page.tsx         # Detalle con historia y rareza
-│   ├── new-plant/                # Registro con catálogo global
+│   │   └── [id]/page.tsx         # Detalle con historia, rareza, kardex y share
+│   ├── new-plant/                # Registro con catálogo global + cámara + HEIC
 │   │   └── page.tsx
 │   ├── germinations/
 │   ├── cemetery/
@@ -113,6 +119,9 @@ plant-manager/
 │       └── tips/
 ├── components/
 │   ├── PlantCard.tsx             # Carta estilo Panini (portrait 2:3, holográfica)
+│   ├── CameraCapture.tsx         # Modal de cámara con gestión de permisos
+│   ├── LanguageToggle.tsx        # Selector ES/EN reutilizable
+│   ├── PublicPlantView.tsx       # Vista pública de una planta (/p/slug)
 │   ├── GardenerLevelBadge.tsx    # Badge de nivel con barra de progreso
 │   ├── ShareProfileButton.tsx    # Modal para compartir y editar username
 │   ├── PublicProfileView.tsx     # Vista del perfil público
@@ -124,22 +133,28 @@ plant-manager/
 │   └── Providers.tsx
 ├── context/
 │   ├── AuthContext.tsx
-│   └── LanguageContext.tsx       # i18n (es/en)
+│   └── LanguageContext.tsx       # i18n (es/en) + localStorage
 ├── lib/
 │   ├── supabase.ts
 │   ├── supabase-server.ts
 │   ├── claude.ts                 # Identificación + rareza + historia
+│   ├── chat-system-prompt.ts     # Builder del system prompt del chat "Bud"
+│   ├── image.ts                  # Validación HEIC/formato/tamaño + conversión
 │   └── gamification.ts          # Cálculo de puntos y niveles
 ├── types/
 │   └── index.ts                  # Plant, Species, Profile, Rarity, GardenerLevel…
 ├── messages/
 │   ├── es.json
 │   └── en.json
+├── docs/
+│   ├── tarea-2-nicho-everbud.md  # Análisis de nicho + recomendación mascota "Bud"
+│   └── tarea-4-panel-admin.md   # Spec del panel de administración del chat
 ├── supabase/
 │   ├── schema.sql
 │   ├── migration-auth.sql
-│   └── migration-species-profiles.sql  # ← ejecutar para nuevas features
-└── middleware.ts                 # Auth + rutas de perfil público
+│   ├── migration-species-profiles.sql
+│   └── migration-plant-slugs.sql   # ← slugs legibles para /p/<slug>
+└── middleware.ts                 # Auth + rutas de perfil y plantas públicas
 ```
 
 ---
@@ -181,8 +196,9 @@ ANTHROPIC_API_KEY=tu-api-key-aqui
 2. Ve al **SQL Editor** y ejecuta los archivos **en este orden**:
    ```
    supabase/schema.sql
-   supabase/migration-auth.sql          (si ya tienes usuarios)
-   supabase/migration-species-profiles.sql   ← nuevas funciones
+   supabase/migration-auth.sql                ← (si ya tienes usuarios)
+   supabase/migration-species-profiles.sql    ← catálogo global, perfiles
+   supabase/migration-plant-slugs.sql         ← URLs compartibles /p/<slug>
    ```
 3. En **Storage**, verifica que el bucket `plant-images` exista con acceso público
 
@@ -279,12 +295,18 @@ npm run lint     # Linter de código
 ## 🗺️ Roadmap
 
 - [x] Identificación por IA (imagen y nombre)
+- [x] Soporte HEIC (iPhone): conversión automática a JPEG en el cliente
+- [x] Cámara integrada con gestión de permisos del navegador
 - [x] Cartas coleccionables estilo Panini con rareza holográfica
 - [x] Catálogo global de especies compartido
 - [x] Historia / About generada por IA por especie
 - [x] Perfil público compartible (`/username`)
+- [x] Plantas compartibles con URL legible (`/p/<slug>`) y Open Graph
 - [x] Sistema de niveles y gamificación
-- [x] Multiidioma (es/en)
+- [x] Multiidioma (es/en) en todas las pantallas, incluyendo páginas públicas
+- [x] System prompt del chat "Bud" con diagnóstico por foto + kardex
+- [ ] Widget del chat en la app (Bud en producción)
+- [ ] Panel de administración del chat (instrucciones, RAG, revisión de conversaciones)
 - [ ] Notificaciones push para recordatorios de riego
 - [ ] Modo offline con Service Worker (PWA)
 - [ ] Exportación de datos en CSV/PDF
