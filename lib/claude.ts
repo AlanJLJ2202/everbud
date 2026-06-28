@@ -16,6 +16,7 @@ export interface PlantIdentification {
   family: string
   origin: string
   confidence: 'alta' | 'media' | 'baja'
+  bbox?: { x: number; y: number; w: number; h: number }
 }
 
 const VALID_RARITIES = ['comun', 'poco_comun', 'rara', 'muy_rara', 'legendaria']
@@ -230,12 +231,15 @@ Cada elemento del array debe tener exactamente estas keys:
   "story": "historia breve de la especie (2-3 frases): origen, curiosidades o usos",
   "family": "familia botánica (ej. Rosaceae)",
   "origin": "región geográfica de origen",
-  "confidence": "alta | media | baja"
+  "confidence": "alta | media | baja",
+  "bbox": {"x": fracción_0_a_1_borde_izquierdo, "y": fracción_0_a_1_borde_superior, "w": fracción_0_a_1_ancho, "h": fracción_0_a_1_alto}
 }
 
 IMPORTANTE: Los valores de "type", "light_type", "rarity" y "confidence" DEBEN estar en español. Solo "common_name", "tips", "story" y "origin" deben estar en el idioma indicado.
 
-Para "rarity" evalúa qué tan común es como planta de cultivo doméstico. Los tips deben ser prácticos y cortos (máx 15 palabras cada uno). Si no puedes identificar una planta con certeza, usa confidence "baja" y da tu mejor estimación.`,
+Para "rarity" evalúa qué tan común es como planta de cultivo doméstico. Los tips deben ser prácticos y cortos (máx 15 palabras cada uno). Si no puedes identificar una planta con certeza, usa confidence "baja" y da tu mejor estimación.
+
+Para "bbox" indica las coordenadas normalizadas (0 a 1) del rectángulo que rodea a cada planta en la imagen. x=0 es el borde izquierdo, y=0 es el borde superior. Sé preciso: el bbox debe ajustarse lo más posible a la silueta de la planta.`,
           },
         ],
       },

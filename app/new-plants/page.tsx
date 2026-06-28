@@ -2,9 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { supabase, uploadImage } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
 import { PlantIdentification } from '@/lib/claude'
@@ -21,6 +20,8 @@ interface PlantItem {
   selected: boolean
   existingSpecies: Species | null
   status: 'pending' | 'saving' | 'saved' | 'error'
+  color: string
+  cropDataUrl?: string
 }
 
 const TYPE_EMOJI: Record<string, string> = {
@@ -35,6 +36,54 @@ const LIGHT_ICON: Record<string, string> = {
   sol_pleno: '🌞',
   media_sombra: '🌤',
   sombra: '🌑',
+}
+
+const BBOX_COLORS = [
+  '#16a34a', '#2563eb', '#dc2626', '#d97706',
+  '#7c3aed', '#0891b2', '#db2777', '#65a30d',
+]
+
+async function cropImageRegion(
+  imageDataUrl: string,
+  bbox: { x: number; y: number; w: number; h: number }
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return reject(new Error('No canvas context'))
+
+      const iw = img.naturalWidth
+      const ih = img.naturalHeight
+
+      // 5% padding so the plant doesn't touch the edges
+      const padX = bbox.w * iw * 0.05
+      const padY = bbox.h * ih * 0.05
+
+      const sx = Math.max(0, bbox.x * iw - padX)
+      const sy = Math.max(0, bbox.y * ih - padY)
+      const sw = Math.min(iw - sx, bbox.w * iw + padX * 2)
+      const sh = Math.min(ih - sy, bbox.h * ih + padY * 2)
+
+      canvas.width = Math.round(sw)
+      canvas.height = Math.round(sh)
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+
+      resolve(canvas.toDataURL('image/jpeg', 0.9))
+    }
+    img.onerror = () => reject(new Error('Image load failed'))
+    img.src = imageDataUrl
+  })
+}
+
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const [header, data] = dataUrl.split(',')
+  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+  const binary = atob(data)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return new File([bytes], filename, { type: mime })
 }
 
 export default function NewPlantsPage() {
@@ -77,9 +126,14 @@ export default function NewPlantsPage() {
       return
     }
 
-    const reader = new FileReader()
-    reader.onloadend = () => setImagePreview(reader.result as string)
-    reader.readAsDataURL(file)
+    // Read to data URL (needed for Canvas cropping later)
+    const imageDataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+    setImagePreview(imageDataUrl)
 
     try {
       const formData = new FormData()
@@ -98,18 +152,30 @@ export default function NewPlantsPage() {
 
       const results: PlantIdentification[] = await response.json()
 
-      // Query existing species for all plants in parallel
-      const speciesResults = await Promise.all(
-        results.map(async (r) => {
-          if (!r.scientific_name?.trim()) return null
-          const { data } = await supabase
-            .from('species')
-            .select('*')
-            .ilike('scientific_name', r.scientific_name.trim())
-            .maybeSingle()
-          return (data as Species | null) || null
-        })
-      )
+      // Fetch species data and compute crops in parallel
+      const [speciesResults, cropUrls] = await Promise.all([
+        Promise.all(
+          results.map(async (r) => {
+            if (!r.scientific_name?.trim()) return null
+            const { data } = await supabase
+              .from('species')
+              .select('*')
+              .ilike('scientific_name', r.scientific_name.trim())
+              .maybeSingle()
+            return (data as Species | null) || null
+          })
+        ),
+        Promise.all(
+          results.map(async (r) => {
+            if (!r.bbox) return undefined
+            try {
+              return await cropImageRegion(imageDataUrl, r.bbox)
+            } catch {
+              return undefined
+            }
+          })
+        ),
+      ])
 
       setPlants(
         results.map((r, i) => ({
@@ -119,6 +185,8 @@ export default function NewPlantsPage() {
           selected: true,
           existingSpecies: speciesResults[i],
           status: 'pending',
+          color: BBOX_COLORS[i % BBOX_COLORS.length],
+          cropDataUrl: cropUrls[i],
         }))
       )
       setPhase('review')
@@ -185,6 +253,17 @@ export default function NewPlantsPage() {
       const r = item.identification
 
       try {
+        // Upload individual crop if available
+        let imageUrl: string | null = null
+        if (item.cropDataUrl) {
+          try {
+            const cropFile = dataUrlToFile(item.cropDataUrl, `${item.key.slice(0, 8)}.jpg`)
+            imageUrl = await uploadImage(cropFile)
+          } catch {
+            // Continue without image if upload fails
+          }
+        }
+
         let speciesId: string | null = item.existingSpecies?.id ?? null
 
         if (!speciesId && r.scientific_name?.trim()) {
@@ -201,7 +280,7 @@ export default function NewPlantsPage() {
               story: r.story?.trim() || null,
               family: r.family?.trim() || null,
               origin: r.origin?.trim() || null,
-              image_url: null,
+              image_url: imageUrl,
               created_by: user!.id,
             })
             .select()
@@ -233,7 +312,7 @@ export default function NewPlantsPage() {
           light_type: r.light_type,
           water_every_days: r.water_every_days,
           tips: r.tips.filter((tip) => tip.trim()),
-          image_url: null,
+          image_url: imageUrl,
           status: 'alive',
         })
 
@@ -268,6 +347,7 @@ export default function NewPlantsPage() {
 
   const selectedCount = plants.filter((p) => p.selected).length
   const allSelected = plants.length > 0 && plants.every((p) => p.selected)
+  const hasBboxes = plants.some((p) => p.identification.bbox)
 
   return (
     <div className="min-h-screen bg-cream-50 py-8 px-4">
@@ -279,7 +359,6 @@ export default function NewPlantsPage() {
           <p className="text-gray-500 mt-1 text-sm">{t('newPlants.subtitle')}</p>
         </div>
 
-        {/* Hidden inputs */}
         <input
           type="file"
           ref={cameraInputRef}
@@ -363,8 +442,8 @@ export default function NewPlantsPage() {
         {phase === 'identifying' && (
           <div className="mt-4">
             {imagePreview && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-6">
-                <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+              <div className="w-full rounded-2xl overflow-hidden mb-6">
+                <img src={imagePreview} alt="Preview" className="w-full h-auto block" />
               </div>
             )}
             <div className="bg-botanical-50 border border-botanical-200 rounded-2xl p-8 text-center">
@@ -382,12 +461,55 @@ export default function NewPlantsPage() {
         {/* Review phase */}
         {phase === 'review' && (
           <div className="mt-4">
+            {/* Garden image with bbox overlays */}
             {imagePreview && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden mb-6">
-                <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+              <div className="relative w-full mb-6 rounded-2xl overflow-hidden shadow-sm">
+                <img
+                  src={imagePreview}
+                  alt="Garden preview"
+                  className="w-full h-auto block"
+                />
+                {hasBboxes && plants.map((item, idx) => {
+                  const bb = item.identification.bbox
+                  if (!bb) return null
+                  return (
+                    <div
+                      key={item.key}
+                      style={{
+                        position: 'absolute',
+                        left: `${bb.x * 100}%`,
+                        top: `${bb.y * 100}%`,
+                        width: `${bb.w * 100}%`,
+                        height: `${bb.h * 100}%`,
+                        border: `2px solid ${item.color}`,
+                        borderRadius: '6px',
+                        opacity: item.selected ? 1 : 0.35,
+                        transition: 'opacity 0.2s',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-1px',
+                          left: '-1px',
+                          background: item.color,
+                          color: 'white',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          padding: '1px 6px',
+                          borderRadius: '3px',
+                          lineHeight: '18px',
+                        }}
+                      >
+                        {idx + 1}
+                      </span>
+                    </div>
+                  )
+                })}
                 <button
                   onClick={resetAll}
-                  className="absolute top-2 right-2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white"
+                  className="absolute top-2 right-2 bg-white/90 p-2 rounded-full shadow-md hover:bg-white text-sm"
                 >
                   ✕
                 </button>
@@ -407,7 +529,7 @@ export default function NewPlantsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              {plants.map((item) => {
+              {plants.map((item, idx) => {
                 const r = item.identification
                 const confidenceColor =
                   r.confidence === 'alta'
@@ -419,39 +541,58 @@ export default function NewPlantsPage() {
                 return (
                   <div
                     key={item.key}
-                    className={`rounded-2xl border p-4 transition-all ${
+                    className={`rounded-2xl border-2 p-4 transition-all ${
                       item.selected
-                        ? 'border-botanical-400 bg-white shadow-sm'
-                        : 'border-gray-200 bg-gray-50 opacity-60'
+                        ? 'bg-white shadow-sm'
+                        : 'bg-gray-50 opacity-60'
                     }`}
+                    style={{ borderColor: item.selected ? item.color : '#e5e7eb' }}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-2xl flex-shrink-0">
+                    {/* Header: crop/emoji + info + checkbox */}
+                    <div className="flex items-start gap-3 mb-3">
+                      {/* Crop thumbnail or emoji */}
+                      {item.cropDataUrl ? (
+                        <img
+                          src={item.cropDataUrl}
+                          alt={r.common_name}
+                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 text-3xl">
                           {TYPE_EMOJI[r.type] || '🪴'}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 truncate">
+                        </div>
+                      )}
+
+                      <div className="flex-1 min-w-0">
+                        {/* Number badge + name */}
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span
+                            className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                            style={{ background: item.color }}
+                          >
+                            {idx + 1}
+                          </span>
+                          <p className="font-semibold text-gray-900 truncate text-sm">
                             {r.common_name}
                           </p>
-                          <p className="text-xs text-gray-500 italic truncate">
-                            {r.scientific_name}
-                          </p>
                         </div>
+                        <p className="text-xs text-gray-500 italic truncate">
+                          {r.scientific_name}
+                        </p>
                       </div>
+
                       <input
                         type="checkbox"
                         checked={item.selected}
                         onChange={() => togglePlant(item.key)}
-                        className="mt-1 h-5 w-5 rounded accent-botanical-600 flex-shrink-0 cursor-pointer"
+                        className="mt-1 h-5 w-5 rounded flex-shrink-0 cursor-pointer accent-botanical-600"
                       />
                     </div>
 
+                    {/* Badges */}
                     <div className="flex flex-wrap gap-1 mb-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${confidenceColor}`}>
-                        {t('newPlants.confidence', {
-                          level: t(`confidence.${r.confidence}`),
-                        })}
+                        {t('newPlants.confidence', { level: t(`confidence.${r.confidence}`) })}
                       </span>
                       {item.existingSpecies && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
@@ -466,6 +607,7 @@ export default function NewPlantsPage() {
                       </span>
                     </div>
 
+                    {/* Nickname input */}
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">
                         {t('newPlants.nickname')}
@@ -484,16 +626,14 @@ export default function NewPlantsPage() {
               })}
             </div>
 
-            {selectedCount > 0 && (
+            {selectedCount > 0 ? (
               <button
                 onClick={handleSaveAll}
                 className="w-full bg-botanical-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-botanical-700 transition-colors"
               >
                 {t('newPlants.registerSelected', { count: selectedCount })}
               </button>
-            )}
-
-            {selectedCount === 0 && (
+            ) : (
               <p className="text-center text-gray-500 text-sm mt-2">
                 {t('newPlants.noneSelected')}
               </p>
@@ -506,10 +646,7 @@ export default function NewPlantsPage() {
           <div className="mt-8 bg-botanical-50 border border-botanical-200 rounded-2xl p-8 text-center">
             <div className="loading-spinner mx-auto mb-4"></div>
             <p className="text-lg font-medium text-botanical-800">
-              {t('newPlants.saving', {
-                current: savingCurrent,
-                total: savingTotal,
-              })}
+              {t('newPlants.saving', { current: savingCurrent, total: savingTotal })}
             </p>
             <div className="mt-4 bg-botanical-200 rounded-full h-2">
               <div
