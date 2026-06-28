@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { supabase, uploadImage } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import { useAuth } from '@/context/AuthContext'
@@ -432,6 +433,18 @@ export default function NewPlantPage() {
             </div>
           )}
         </div>
+
+        {/* Multi-plant shortcut */}
+        {!imagePreview && (
+          <div className="mb-4 text-center">
+            <p className="text-sm text-gray-500">
+              {t('newPlants.multiPlantLabel')}{' '}
+              <Link href="/new-plants" className="text-botanical-600 hover:underline font-medium">
+                {t('newPlants.multiPlantLink')}
+              </Link>
+            </p>
+          </div>
+        )}
 
         {/* Text Identification Section */}
         {!imagePreview && (
