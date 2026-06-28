@@ -39,7 +39,7 @@ export async function identifyPlant(base64Image: string, mediaType: string, loca
   const langInstruction = localeInstructions[locale] || localeInstructions.es
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1600,
     messages: [
       {
@@ -124,7 +124,7 @@ export async function identifyPlantByName(plantName: string, locale: string = 'e
   const langInstruction = localeInstructions[locale] || localeInstructions.es
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1600,
     messages: [
       {
@@ -198,7 +198,7 @@ export async function generateContextualTip(plantName: string, commonName: strin
     : 'Responde en español. Máximo 15 palabras.'
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 256,
     messages: [
       {
