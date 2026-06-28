@@ -239,7 +239,7 @@ IMPORTANTE: Los valores de "type", "light_type", "rarity" y "confidence" DEBEN e
 
 Para "rarity" evalúa qué tan común es como planta de cultivo doméstico. Los tips deben ser prácticos y cortos (máx 15 palabras cada uno). Si no puedes identificar una planta con certeza, usa confidence "baja" y da tu mejor estimación.
 
-Para "bbox" indica las coordenadas normalizadas (0 a 1) del rectángulo que rodea a cada planta en la imagen. x=0 es el borde izquierdo, y=0 es el borde superior. Sé preciso: el bbox debe ajustarse lo más posible a la silueta de la planta.`,
+Para "bbox" indica las coordenadas normalizadas (0 a 1) del rectángulo mínimo que encierra a cada planta INCLUYENDO su maceta o contenedor, pero EXCLUYENDO el suelo, la pared y cualquier espacio vacío alrededor. El borde inferior del bbox debe coincidir con la base de la maceta, no con el suelo debajo. Sé conservador: es mejor que el bbox sea ligeramente pequeño a que incluya área vacía. x=0 es el borde izquierdo de la imagen, y=0 es el borde superior.`,
           },
         ],
       },
